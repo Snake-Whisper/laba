@@ -21,3 +21,26 @@ def closeDB(error):
 	if hasattr(g, 'db'):
 		g.db.commit()
 		g.db.close()
+
+@app.cli.command('initDB')
+def initdb():
+	with app.open_resource('schema.sql', mode='r') as f:
+		c = getDBCursor()
+		for query in f.read().split(";")[:-1]:
+			print(query)
+			c.execute(query)
+		f.close() 
+		c.close()
+		g.db.commit() #manual tear down!
+
+@app.cli.command('randomFill')
+def randomFill():
+	with app.open_resource('testdata.sql', mode='r') as f:
+		c = getDBCursor()
+		for query in f.read().split(";")[:-1]:
+			print(query)
+			c.execute(query)
+		f.close() 
+		c.close()
+		g.db.commit() #manual tear down!
+
