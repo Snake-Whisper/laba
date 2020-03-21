@@ -129,6 +129,12 @@ class User():
             self.__icon = value
             self.__changed['icon'] = value
     
+    def changePwd (self, old, new):
+        r = self.cursor.execute("UPDATE users SET password=SHA2(%s, 256) WHERE id=%s AND password=SHA2(%s, 256);", (new, self.__id, old))
+        print(r)
+        if not r:
+            raise BadUserCredentials(self.__username)
+    
     def commit(self):
         if self.__changed:
             sql="UPDATE users SET {0} WHERE users.id = {1}".format(", ".join(i+"=%s" for i in self.__changed.keys()), self.__id)
