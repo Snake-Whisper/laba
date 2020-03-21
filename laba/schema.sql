@@ -8,7 +8,7 @@ DROP table if exists users;
 CREATE TABLE IF NOT EXISTS users (
 	id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
 	username VARCHAR(50) NOT NULL,
-	password VARCHAR(41) NOT NULL,
+	password CHAR(64) NOT NULL,
 	firstName VARCHAR(50) NOT NULL,
 	lastName VARCHAR(50) NOT NULL,
 	email VARCHAR(75) NOT NULL,
