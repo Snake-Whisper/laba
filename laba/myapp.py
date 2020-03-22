@@ -1,5 +1,6 @@
 from flask import Flask, render_template, g
 import pymysql
+import redis
 from user import *
 
 app = Flask(__name__)
@@ -14,7 +15,8 @@ app.config.update(
 
 def getRedis():
 	if not hasattr(g, 'redis'):
-		g.redis = FlaskRedis(app)
+		#g.redis = FlaskRedis(app)
+		g.redis = redis.Redis(host='localhost', port=6379, db=0)
 	return g.redis
 
 def getDBCursor():
@@ -22,10 +24,12 @@ def getDBCursor():
 		g.db = pymysql.connect(user='laba', password='brUQJD1sAYeQaeuJ', db='laba', cursorclass=pymysql.cursors.DictCursor, host="localhost")
 	return g.db.cursor()
 
+
 @app.route("/")
 def test():
-	#u = LoginUser("user1", "pwd1!")
-	u = RedisUser()
+	u = LoginUser("user1", "pwd1!")
+	u.logOut()
+	#u = RedisUser()
 	#u = User()
 	#u = LoginUser()
 	#u.email = "test@ruschinski.ml"

@@ -12,8 +12,8 @@ class UserDisabled(Exception):
 
 class UserNotInitialized(Exception):
     def __str__(self):
-        return "User hasn't been initialized yet."
-        
+        return "User hasn't been initialized yet or has been logged out."
+
 class NotInitializeable(Exception):
     def __init__(self, name):
         self.name = name

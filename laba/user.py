@@ -3,7 +3,7 @@ import pymysql
 import redis
 import random
 import string
-import json
+from json import loads, dumps
 from exceptions.userException import *
 
 
@@ -11,6 +11,7 @@ class User():
 
     __changed = {}
     _values = {}
+    __loggedIn = True
 
     def __init__(self):
         raise NotInitializeable("User")
@@ -141,16 +142,23 @@ class User():
     def __serialize(self):
         self._values['atime'] = str(self._values['atime']) #Keep private! It's changing self.__value!!!
         self._values['ctime'] = str(self._values['ctime'])
-        return json.dumps(self._values)
+        return dumps(self._values)
     
-    def commit2redis(self):        
+    def commit2redis(self):
+        print ("commited")
         g.redis.set(self._uuid, self.__serialize(), 300)
+    
+    def logOut(self):
+        self.__loggedIn = False
+        g.redis.delete(session["uuid"])
+        session.pop("uuid")
 
     def __del__(self):
         self.commit2db()
         self.cursor.close()
         g.db.commit()
-        self.commit2redis()
+        if self.__loggedIn:
+            self.commit2redis()
 
 class LoginUser(User):
     def __init__(self, username, passwd):
@@ -176,5 +184,8 @@ class RedisUser(User):
     def __init__(self):
         User._init(self)
         self._uuid = session["uuid"]
-        self._values = json.loads(g.redis.get(session['uuid']))
+        vals = g.redis.get(session['uuid'])
+        if not vals:
+            raise UserNotInitialized()
+        self._values = loads(vals)
  
