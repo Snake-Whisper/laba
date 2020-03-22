@@ -60,3 +60,19 @@ def randomFill():
 		c.close()
 		g.db.commit() #manual tear down!
 
+@app.cli.command('reset')
+def reset():
+	c = getDBCursor()
+	with app.open_resource('schema.sql', mode='r') as f:
+		for query in f.read().split(";")[:-1]:
+			print(query)
+			c.execute(query)
+		f.close()
+	with app.open_resource('testdata.sql', mode='r') as f:
+		for query in f.read().split(";")[:-1]:
+			print(query)
+			c.execute(query)
+		f.close() 
+	c.close()
+	g.db.commit()
+
