@@ -1,6 +1,6 @@
 from flask import Flask, render_template, g
 import pymysql
-from user import LoginUser
+from user import *
 
 app = Flask(__name__)
 
@@ -24,11 +24,14 @@ def getDBCursor():
 
 @app.route("/")
 def test():
-	u = LoginUser("user1", "pwd1!")
-	u.email = "test@ruschinski.ml"
-	u.firstName = "jack"
-	u.lastName = "sparrow"
-	print (u.uuid)
+	#u = LoginUser("user1", "pwd1!")
+	u = RedisUser()
+	#u = User()
+	#u = LoginUser()
+	#u.email = "test@ruschinski.ml"
+	#u.firstName = "jack"
+	#u.lastName = "sparrow"
+	#print (u.uuid)
 	v = getRedis()
 	return "hallo"
 
