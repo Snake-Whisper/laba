@@ -32,15 +32,6 @@ class LoginUser():
 
         self.__changed = {}
 
-        #self.__id = self.values["id"]
-        #self.__username = self.values["username"]
-        #self.__firstName = self.values["firstName"]
-        #self.__lastName = self.values["lastName"]
-        #self.__email = self.values["email"]
-        #self.__ctime = self.values["ctime"]
-        #self.__atime = self.values["atime"] #last seen
-        #self.__status = self.values["status"]
-        #self.__icon = self.values["icon"]
         self.__uuid = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
 
         session['uuid'] = self.__uuid
