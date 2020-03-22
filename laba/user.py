@@ -1,22 +1,21 @@
-from flask import g
+from flask import g, session
 import pymysql
+import redis
+import random
+import string
+import json
 from exceptions.userException import BadUserCredentials, UserDisabled
 
-class User():
-    
-    def query(self, query, param = ()):
-	    self.cursor.execute(query, param)
-	    return self.cursor.fetchall()
-    
-    def queryOne(self, query, param = ()):
-	    self.cursor.execute(query, param)
-	    return self.cursor.fetchone()
+
+class LoginUser():    
 
     def __init__(self, username, passwd, register=False):
         """User Object"""
         if not hasattr(g, 'db'):
             g.db = pymysql.connect(user='laba', password='brUQJD1sAYeQaeuJ', db='laba', cursorclass=pymysql.cursors.DictCursor, host="localhost")
         self.cursor = g.db.cursor()
+        if not hasattr(g, 'redis'):
+            g.redis = redis.Redis(host='localhost', port=6379, db=0)
         #chkCred
         res = self.queryOne("""SELECT
                 id, username, firstName, lastName, email, ctime, atime, status, icon, enabled
@@ -42,6 +41,9 @@ class User():
         self.__atime = res["atime"] #last seen
         self.__status = res["status"]
         self.__icon = res["icon"]
+        self.__uuid = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
+
+        session['uuid'] = self.__uuid
 
 #      |\_/|                  
 #      | @ @   Watch! 
@@ -51,10 +53,21 @@ class User():
 #  ____|_       ___|   |___.' 
 # /_/_____/____/_______|
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    def query(self, query, param = ()):
+	    self.cursor.execute(query, param)
+	    return self.cursor.fetchall()
+    
+    def queryOne(self, query, param = ()):
+	    self.cursor.execute(query, param)
+	    return self.cursor.fetchone()
 
     @property
     def id(self):
         return self.__id
+    
+    @property
+    def uuid(self):
+        return self.__uuid
     
     @property
     def username(self):
@@ -101,7 +114,6 @@ class User():
             self.__ctime = value
             self.__changed['ctime'] = value
     
-
     @property
     def atime(self):
         return self.__atime
@@ -131,17 +143,30 @@ class User():
     
     def changePwd (self, old, new):
         r = self.cursor.execute("UPDATE users SET password=SHA2(%s, 256) WHERE id=%s AND password=SHA2(%s, 256);", (new, self.__id, old))
-        print(r)
         if not r:
             raise BadUserCredentials(self.__username)
     
-    def commit(self):
+    def commit2db(self):
         if self.__changed:
             sql="UPDATE users SET {0} WHERE users.id = {1}".format(", ".join(i+"=%s" for i in self.__changed.keys()), self.__id)
             self.query(sql, tuple(self.__changed.values()))
+    
+    def commit2redis(self):
+        vars = {"id" : self.__id,
+        "username" : self.__username,
+        "firstName" : self.__firstName,
+        "lastName" : self.__lastName,
+        "email" : self.__email,
+        "ctime" : str(self.__ctime),
+        "atime" : str(self.__atime),
+        "status" : self.__status,
+        "icon" : self.__icon}
+        print (vars)
+        g.redis.set(self.__uuid, json.dumps(vars))
 
     def __del__(self):
-        self.commit()
+        self.commit2db()
         self.cursor.close()
         g.db.commit()
+        self.commit2redis()
         

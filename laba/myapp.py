@@ -1,8 +1,9 @@
 from flask import Flask, render_template, g
 import pymysql
-from user import User
+from user import LoginUser
 
 app = Flask(__name__)
+
 app.config.update(
     SECRET_KEY = '\x81H\xb8\xa3S\xf8\x8b\xbd"o\xca\xd7\x08\xa4op\x07\xb5\xde\x87\xb8\xcc\xe8\x86\\\xffS\xea8\x86"\x97',
 	REDIS_URL = "redis://localhost:6379/0",
@@ -23,11 +24,12 @@ def getDBCursor():
 
 @app.route("/")
 def test():
-	u = User("user1", "pwd1!")
+	u = LoginUser("user1", "pwd1!")
 	u.email = "test@ruschinski.ml"
 	u.firstName = "jack"
 	u.lastName = "sparrow"
-	print (u.id)
+	print (u.uuid)
+	v = getRedis()
 	return "hallo"
 
 @app.teardown_appcontext
