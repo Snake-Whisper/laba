@@ -1,0 +1,6 @@
+graft laba/templates
+graft laba/static
+graft laba/static/files
+include laba/schema.sql
+include laba/testdata.sql
+
