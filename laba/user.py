@@ -12,6 +12,8 @@ class User():
     __changed = {}
     _values = {}
     __loggedIn = True
+    __initialized = False
+    __health = False
 
     def __init__(self):
         raise NotInitializeable("User")
@@ -23,6 +25,7 @@ class User():
         self.cursor = g.db.cursor()
         if not hasattr(g, 'redis'):
             g.redis = redis.Redis(host=app.config["REDIS_HOST"], port=app.config["REDIS_PORT"], db=app.config["REDIS_DB"])
+        self.__initialized = True
 
 
 #      |\_/|                  
@@ -137,7 +140,7 @@ class User():
         if self.__changed:
             sql="UPDATE users SET {0} WHERE users.id = {1}".format(", ".join(i+"=%s" for i in self.__changed.keys()), self._values["id"])
             self.query(sql, tuple(self.__changed.values()))
-            print("updated")
+            print("updated db")
     
     def __serialize(self):
         self._values['atime'] = str(self._values['atime']) #Keep private! It's changing self.__value!!!
@@ -145,20 +148,23 @@ class User():
         return dumps(self._values)
     
     def commit2redis(self):
-        print ("commited")
+        print ("commited to redis")
         g.redis.set(self._uuid, self.__serialize(), 300)
     
     def logOut(self):
         self.__loggedIn = False
         g.redis.delete(session["uuid"])
         session.pop("uuid")
+    def startSession(self):
+        self.__health = True
 
     def __del__(self):
-        self.commit2db()
-        self.cursor.close()
-        g.db.commit()
-        if self.__loggedIn:
-            self.commit2redis()
+        if self.__initialized and self.__health:
+            self.commit2db()
+            self.cursor.close()
+            g.db.commit()
+            if self.__loggedIn:
+                self.commit2redis()
 
 class LoginUser(User):
     def __init__(self, app, username, passwd):
@@ -178,15 +184,20 @@ class LoginUser(User):
         if not self._values["enabled"]:
             raise UserDisabled(username)
         
+        self.startSession()
         self._uuid = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
         session['uuid'] = self._uuid
 
 class RedisUser(User):
     def __init__(self, app):
+        if not 'uuid' in session:
+            raise UserNotInitialized()
         User._init(self, app)
         self._uuid = session["uuid"]
         vals = g.redis.get(session['uuid'])
         if not vals:
+            session.pop("uuid")
             raise UserNotInitialized()
+        self.startSession()
         self._values = loads(vals)
  

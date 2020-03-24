@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset='utf-8'>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Register - laba</title>
+		<!-- <link rel=stylesheet type=text/css href="{{ url_for('static', filename='login.css') }}"> -->
+	</head>
+	<body>
+		<div id='login'>
+			{% if email %}
+			Successful send email with registration key to <strong>{{email}}</strong> Back to <a href="{{ url_for("login")}}">login</a>.
+			{%else%}
+			<form action="{{ url_for("register")}}" method=post>
+				<dl>
+					<dt>Username:	<dd><input type=text name=username>
+					<dt>Password:	<dd><input type=password name=password>
+					<dt>Confirm Password:<dd><input type=password name=Confpassword>
+					<dt>First Name:	<dd><input type=text name=firstName>
+					<dt>Last Name:	<dd><input type=text name=lastName>
+					<dt>email:	<dd><input type=text name=email>
+					{% for message in get_flashed_messages() %}
+            		<div class=flash>{{ message }}</div>
+            		{% endfor %}
+					<dd><input type=submit value=register> or 
+					<a href="{{ url_for("login")}}">login</a>
+				</dl>
+			</form>
+			{% endif %}
+		</div>
+	</body>
+</html>

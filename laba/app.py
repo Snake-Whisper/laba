@@ -1,7 +1,8 @@
-from flask import Flask, render_template, g
+from flask import Flask, render_template, g, redirect, request, flash
 import pymysql
 import redis
 from user import *
+from functools import wraps
 
 app = Flask(__name__)
 
@@ -20,6 +21,58 @@ app.config.update(
 	REDIS_PORT = 6379
 )
 
+def login_required(f):
+	@wraps(f)
+	def dec_funct(*args, **kwargs):
+		try:
+			if not hasattr (g, 'user'):
+				g.user = RedisUser(app)
+		except UserNotInitialized:
+			print("raus")
+			return redirect("/login")
+		return f(*args, **kwargs)
+	return dec_funct
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+	try:
+		g.user = RedisUser(app)
+		return redirect('/')
+	except UserNotInitialized:
+		if request.method == 'POST':
+			if all([request.form['username'], request.form['password']]):
+				try:
+					g.user = LoginUser(app, request.form['username'], request.form['password'])
+					return redirect("/")
+				except BadUserCredentials:
+					flash("authentication failure")
+					return redirect("/login")			
+		return render_template("login.html")
+
+@app.route("/logout")
+@login_required #ironic
+def logOut():
+	g.user.logOut()
+	return redirect("/login")
+
+@app.route("/register")
+def register():
+	return render_template("register.html")
+
+@app.route("/")
+@login_required
+def root():
+	return "hallo"
+
+@app.teardown_appcontext
+def closeDB(error):
+	if hasattr(g, 'user'):
+		del g.user #exec destruct before app context breaks down
+	if hasattr(g, 'db'):
+		g.db.commit()
+		g.db.close()
+
 def getRedis():
 	if not hasattr(g, 'redis'):
 		g.redis = redis.Redis(host=app.config["REDIS_HOST"], port=app.config["REDIS_PORT"], db=app.config["REDIS_DB"])
@@ -29,27 +82,6 @@ def getDBCursor():
 	if not hasattr(g, 'db'):
 		g.db = pymysql.connect(user=app.config["DB_USER"], db=app.config["DB_DB"], password=app.config["DB_PWD"], host=app.config["DB_HOST"], cursorclass=pymysql.cursors.DictCursor)
 	return g.db.cursor()
-
-
-@app.route("/")
-def test():
-	u = LoginUser(app, "user1", "pwd1!")
-	u.logOut()
-	#u = RedisUser()
-	#u = User()
-	#u = LoginUser()
-	#u.email = "test@ruschinski.ml"
-	#u.firstName = "jack"
-	#u.lastName = "sparrow"
-	#print (u.uuid)
-	v = getRedis()
-	return "hallo"
-
-@app.teardown_appcontext
-def closeDB(error):
-	if hasattr(g, 'db'):
-		g.db.commit()
-		g.db.close()
 
 @app.cli.command('initDB')
 def initdb():

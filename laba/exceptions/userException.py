@@ -19,3 +19,7 @@ class NotInitializeable(Exception):
         self.name = name
     def __str__(self):
         return "Class {0} can't be initialized direct. Please create subclass and overide constructor".format(self.name)
+
+class SessionNotStarted(Exception):
+    def __str__(self):
+        return "Session hasn't been started yet."
