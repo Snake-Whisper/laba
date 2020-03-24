@@ -83,3 +83,5 @@ def reset():
 	c.close()
 	g.db.commit()
 
+if __name__ == "__main__":
+	app.run(debug=True)
