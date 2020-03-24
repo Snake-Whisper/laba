@@ -16,13 +16,13 @@ class User():
     def __init__(self):
         raise NotInitializeable("User")
 
-    def _init(self):
+    def _init(self, app):
         """User Object"""
         if not hasattr(g, 'db'):
-            g.db = pymysql.connect(user='laba', password='brUQJD1sAYeQaeuJ', db='laba', cursorclass=pymysql.cursors.DictCursor, host="localhost")
+            g.db = pymysql.connect(user=app.config["DB_USER"], db=app.config["DB_DB"], password=app.config["DB_PWD"], host=app.config["DB_HOST"], cursorclass=pymysql.cursors.DictCursor)
         self.cursor = g.db.cursor()
         if not hasattr(g, 'redis'):
-            g.redis = redis.Redis(host='localhost', port=6379, db=0)
+            g.redis = redis.Redis(host=app.config["REDIS_HOST"], port=app.config["REDIS_PORT"], db=app.config["REDIS_DB"])
 
 
 #      |\_/|                  
@@ -161,9 +161,9 @@ class User():
             self.commit2redis()
 
 class LoginUser(User):
-    def __init__(self, username, passwd):
+    def __init__(self, app, username, passwd):
         """Checks User cred and logs in + moves to redis if ready"""
-        User._init(self)
+        User._init(self, app)
         self._values = self.queryOne("""SELECT
                 id, username, firstName, lastName, email, ctime, atime, status, icon, enabled
                 FROM users
@@ -171,6 +171,7 @@ class LoginUser(User):
                 (username = %s or email = %s)
                 AND
                 password = SHA2(%s, 256)""", (username, username, passwd))
+
         if not self._values:
             raise BadUserCredentials(username)
         
@@ -181,8 +182,8 @@ class LoginUser(User):
         session['uuid'] = self._uuid
 
 class RedisUser(User):
-    def __init__(self):
-        User._init(self)
+    def __init__(self, app):
+        User._init(self, app)
         self._uuid = session["uuid"]
         vals = g.redis.get(session['uuid'])
         if not vals:

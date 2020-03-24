@@ -10,24 +10,30 @@ app.config.update(
 	REDIS_URL = "redis://localhost:6379/0",
 	AUTO_LOGOUT = 43200,
 	MAX_CONTENT_LENGTH = 30 * 1024 * 1024,
-	DATADIR = "static/files"
+	DATADIR = "static/files",
+	DB_USER = "laba",
+	DB_DB = "laba",
+	DB_PWD = "brUQJD1sAYeQaeuJ",
+	DB_HOST = "localhost",
+	REDIS_HOST = "localhost",
+	REDIS_DB = 0,
+	REDIS_PORT = 6379
 )
 
 def getRedis():
 	if not hasattr(g, 'redis'):
-		#g.redis = FlaskRedis(app)
-		g.redis = redis.Redis(host='localhost', port=6379, db=0)
+		g.redis = redis.Redis(host=app.config["REDIS_HOST"], port=app.config["REDIS_PORT"], db=app.config["REDIS_DB"])
 	return g.redis
 
 def getDBCursor():
 	if not hasattr(g, 'db'):
-		g.db = pymysql.connect(user='laba', password='brUQJD1sAYeQaeuJ', db='laba', cursorclass=pymysql.cursors.DictCursor, host="localhost")
+		g.db = pymysql.connect(user=app.config["DB_USER"], db=app.config["DB_DB"], password=app.config["DB_PWD"], host=app.config["DB_HOST"], cursorclass=pymysql.cursors.DictCursor)
 	return g.db.cursor()
 
 
 @app.route("/")
 def test():
-	u = LoginUser("user1", "pwd1!")
+	u = LoginUser(app, "user1", "pwd1!")
 	u.logOut()
 	#u = RedisUser()
 	#u = User()
