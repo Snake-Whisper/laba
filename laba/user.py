@@ -134,7 +134,6 @@ class User():
         if self.__changed:
             sql="UPDATE users SET {0} WHERE users.id = {1}".format(", ".join(i+"=%s" for i in self.__changed.keys()), self._values["id"])
             self.query(sql, tuple(self.__changed.values()))
-            print("updated db")
     
     def __serialize(self):
         self._values['atime'] = str(self._values['atime']) #Keep private! It's changing self.__value!!!
@@ -142,7 +141,6 @@ class User():
         return dumps(self._values)
     
     def commit2redis(self):
-        print ("commited to redis")
         g.redis.set(self._uuid, self.__serialize(), 300)
     
     def logOut(self):
@@ -161,7 +159,7 @@ class User():
                 self.commit2redis()
 
 class LoginUser(User):
-    def __init__(self, app, username, passwd):
+    def __init__(self, app, username, password):
         """Checks User cred and logs in + moves to redis if ready"""
         User._init(self, app)
         self._values = self.queryOne("""SELECT
@@ -170,7 +168,7 @@ class LoginUser(User):
                 WHERE
                 (username = %s or email = %s)
                 AND
-                password = SHA2(%s, 256)""", (username, username, passwd))
+                password = SHA2(%s, 256)""", (username, username, password))
 
         if not self._values:
             raise BadUserCredentials(username)
@@ -198,6 +196,7 @@ class RedisUser(User):
 class RegisterUser():
     _values = {}
     def __init__(self, app):
+        self.app = app
         assert not 'uuid' in session
         if not hasattr(g, 'db'):
             g.db = pymysql.connect(user=app.config["DB_USER"], db=app.config["DB_DB"], password=app.config["DB_PWD"], host=app.config["DB_HOST"], cursorclass=pymysql.cursors.DictCursor)
@@ -245,18 +244,35 @@ class RegisterUser():
     def lastName(self, value):
         self._values["lastName"] = value
     @property
-    def passwd(self):
-        return self._values["passwd"]
-    @passwd.setter
-    def passwd(self, val):
-        self._values["passwd"] = sha256(val.encode()).hexdigest()
+    def password(self):
+        return self._values["password"]
+    @password.setter
+    def password(self, val):
+        self._values["password"] = sha256(val.encode()).hexdigest()
 
     def commit2redis(self):
-        if not all(k in self._values for k in ["email", "passwd", "username", "firstName", "lastName"]):
-            for i in ["email", "passwd", "username", "firstName", "lastName"]:
+        if not all(k in self._values for k in ["email", "password", "username", "firstName", "lastName"]):
+            for i in ["email", "password", "username", "firstName", "lastName"]:
                 if i not in self._values:
                     raise RegistrationErrorInfoMissing(i)
-        print("set to redis")
         token = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
-        g.redis.set(token, dumps(self._values), 30)
+        g.redis.set(token, dumps(self._values), self.app.config["TOKEN_TIMEOUT"])
         return token
+    
+    def confirmToken(self, token):
+        vals = loads(g.redis.get(token))
+        if not vals:
+            raise InvalidToken(token)
+        g.redis.delete(token)
+        #WARNING: No check for dupl entry -> time from registerRequest to confirmation: unprotected ~ Problem?
+        #Without Exception Handling in Prod. env.:  YES -> apk BBQ
+        try:
+            self.query("INSERT INTO users (email, password, username, firstname, lastname) VALUES (%s, %s, %s, %s, %s)", (
+                vals["email"],
+                vals["password"],
+                vals["username"],
+                vals["firstName"],
+                vals["lastName"]))
+        except pymysql.IntegrityError:
+            raise RegistrationErrorDupplicate("email / username")
+        

@@ -3,6 +3,8 @@ import pymysql
 import redis
 from user import *
 from functools import wraps
+from validate_email import validate_email
+
 
 app = Flask(__name__)
 
@@ -10,6 +12,7 @@ app.config.update(
     SECRET_KEY = '\x81H\xb8\xa3S\xf8\x8b\xbd"o\xca\xd7\x08\xa4op\x07\xb5\xde\x87\xb8\xcc\xe8\x86\\\xffS\xea8\x86"\x97',
 	REDIS_URL = "redis://localhost:6379/0",
 	AUTO_LOGOUT = 43200,
+	TOKEN_TIMEOUT = 60,
 	MAX_CONTENT_LENGTH = 30 * 1024 * 1024,
 	DATADIR = "static/files",
 	DB_USER = "laba",
@@ -56,14 +59,61 @@ def logOut():
 	g.user.logOut()
 	return redirect("/login")
 
-@app.route("/register")
+@app.route("/register", methods=["GET", "POST"])
 def register():
+	if request.method == "POST":
+		if not all([request.form["username"],
+				request.form["password"],
+				request.form["Confpassword"],
+				request.form["firstName"],
+				request.form["lastName"],
+				request.form["email"]]):
+			flash("Fill all fields")
+			return redirect ("/register")
+		if request.form["password"] != request.form["Confpassword"]:
+			flash("Please check your password")
+			return redirect("/register")
+		if not validate_email(request.form["email"]):
+			flash("Please check your email address")
+			return redirect("/register")
+			
+		u = RegisterUser(app)
+		try:
+			u.username = request.form["username"]
+			u.email = request.form["email"]
+		except RegistrationErrorDupplicate as e:
+			flash(str(e))
+			return redirect("/register")
+		u.firstName = request.form["firstName"]
+		u.lastName = request.form["lastName"]
+		u.password = request.form["password"]
+
+		token = u.commit2redis()
+
+		#TODO: Add Mail transport!!!
+
+		#   _______    
+		#  |==   []| 
+		#  |  ==== |
+		#//'-------'
+		#
+		return redirect("/confirm/AccountRegistration/" + token)
+
 	return render_template("register.html")
 
 @app.route("/")
 @login_required
 def root():
 	return "hallo"
+
+@app.route("/confirm/AccountRegistration/<token>")
+def confirmAccountRegistration(token):
+	u = RegisterUser(app)
+	try:
+		u.confirmToken(token)
+		return redirect("/login") #add friendly token page?
+	except InvalidToken:
+		return "Token invalid"
 
 @app.teardown_appcontext
 def closeDB(error):
@@ -72,6 +122,15 @@ def closeDB(error):
 	if hasattr(g, 'db'):
 		g.db.commit()
 		g.db.close()
+
+
+
+#   __    __    
+#   \ \   \ \   
+#    \ \   \ \  
+#    / /   / /  
+#   /_/   /_/   
+#             
 
 def getRedis():
 	if not hasattr(g, 'redis'):
