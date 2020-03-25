@@ -5,6 +5,7 @@ import random
 import string
 from json import loads, dumps
 from exceptions.userException import *
+from hashlib import sha256
 
 
 class User():    
@@ -43,14 +44,7 @@ class User():
     def queryOne(self, query, param = ()):
 	    self.cursor.execute(query, param)
 	    return self.cursor.fetchone()
-    
-    #def chkInitialized(self):
-    #    if not hasattr(self, '_value'):
-    #        print(dir (self))
-    #        #raise UserNotInitialized()
-    #    return f
 
-    #@chkInitialized
     @property
     def id(self):
         return self._values["id"]
@@ -70,7 +64,7 @@ class User():
 
     @property
     def firstName(self):
-        return self.__firstName
+        return self._values["firstName"]
     @firstName.setter
     def firstName(self, value):
         if self._values["firstName"] != value:
@@ -201,3 +195,68 @@ class RedisUser(User):
         self.startSession()
         self._values = loads(vals)
  
+class RegisterUser():
+    _values = {}
+    def __init__(self, app):
+        assert not 'uuid' in session
+        if not hasattr(g, 'db'):
+            g.db = pymysql.connect(user=app.config["DB_USER"], db=app.config["DB_DB"], password=app.config["DB_PWD"], host=app.config["DB_HOST"], cursorclass=pymysql.cursors.DictCursor)
+        self.cursor = g.db.cursor()
+        if not hasattr(g, 'redis'):
+            g.redis = redis.Redis(host=app.config["REDIS_HOST"], port=app.config["REDIS_PORT"], db=app.config["REDIS_DB"])
+    
+    def query(self, query, param = ()):
+	    self.cursor.execute(query, param)
+	    return self.cursor.fetchall()
+    
+    def queryOne(self, query, param = ()):
+	    self.cursor.execute(query, param)
+	    return self.cursor.fetchone()
+
+    @property
+    def username(self):
+        return self._values["username"]
+    @username.setter
+    def username(self, value):
+        if self.queryOne("SELECT id FROM users WHERE username=%s", value):
+            raise RegistrationErrorDupplicate("username")
+        self._values["username"] = value
+
+    @property
+    def email(self):
+        return self._values["email"]
+    @email.setter
+    def email(self, value):
+        if self.queryOne("SELECT id FROM users WHERE email=%s", value):
+            raise RegistrationErrorDupplicate("email")
+        self._values["email"] = value
+    
+    @property
+    def firstName(self):
+        return self._values["firstName"]
+    @firstName.setter
+    def firstName(self, value):        
+        self._values["firstName"] = value
+    
+    @property
+    def lastName(self):
+        return self._values["lastName"]
+    @lastName.setter
+    def lastName(self, value):
+        self._values["lastName"] = value
+    @property
+    def passwd(self):
+        return self._values["passwd"]
+    @passwd.setter
+    def passwd(self, val):
+        self._values["passwd"] = sha256(val.encode()).hexdigest()
+
+    def commit2redis(self):
+        if not all(k in self._values for k in ["email", "passwd", "username", "firstName", "lastName"]):
+            for i in ["email", "passwd", "username", "firstName", "lastName"]:
+                if i not in self._values:
+                    raise RegistrationErrorInfoMissing(i)
+        print("set to redis")
+        token = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
+        g.redis.set(token, dumps(self._values), 30)
+        return token
