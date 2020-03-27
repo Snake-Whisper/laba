@@ -58,6 +58,12 @@ class FileFactory():
             print("saved: "+file.filename)
             ids.append(self.queryOne("SELECT id FROM files WHERE chks = %s", chks)['id'])
         return ids
+    
+    def getFile(self, id):
+        """returns ['name':filename, 'url':url] for file with id"""
+        res = self.queryOne("SELECT chks, salt, name FROM files WHERE id=%s", id)
+        assert res, "This messgae should never be visible..."
+        return {'name':res["name"], 'url':self.__generate_url(res["chks"], res["salt"])}
 
 
     def __generate_url(self, chks, salt):

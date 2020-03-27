@@ -5,6 +5,7 @@ from user import *
 from functools import wraps
 from validate_email import validate_email
 from fileFactory import FileFactory
+from json import loads, dumps
 
 
 app = Flask(__name__)
@@ -118,13 +119,18 @@ def confirmAccountRegistration(token):
 	except InvalidToken:
 		return "Token invalid"
 
+#file uploads over xhr!!!
 @app.route("/upload", methods=["POST"])
 @login_required
 def fileUpload():
+	"""Only makes Files on Server available with returned urls and Makes Chat Entry."""
 	f = FileFactory(app)
-	t = f.addFiles()
-	print(t)
-	return redirect("/")
+	ids = f.addFiles()
+	#assert 'chatID' in request
+	#TODO: Make chat Entry
+	#TODO: Tell others in chat file send?
+	print(f.getFile(16))
+	return "ok"
 
 @app.teardown_appcontext
 def closeDB(error):
