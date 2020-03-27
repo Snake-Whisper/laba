@@ -52,6 +52,10 @@ class User():
     @property
     def uuid(self):
         return self.__uuid
+
+    @property
+    def health(self):
+        return self.__health
     
     @property
     def username(self):
@@ -147,6 +151,7 @@ class User():
         self.__loggedIn = False
         g.redis.delete(session["uuid"])
         session.pop("uuid")
+
     def startSession(self):
         self.__health = True
 
