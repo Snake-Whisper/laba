@@ -4,6 +4,7 @@ import redis
 from user import *
 from functools import wraps
 from validate_email import validate_email
+from fileFactory import FileFactory
 
 
 app = Flask(__name__)
@@ -21,7 +22,9 @@ app.config.update(
 	DB_HOST = "localhost",
 	REDIS_HOST = "localhost",
 	REDIS_DB = 0,
-	REDIS_PORT = 6379
+	REDIS_PORT = 6379,
+	SALT_LENGHT = 10,
+	FILEDIR_DEEP = 3
 )
 
 def login_required(f):
@@ -104,7 +107,7 @@ def register():
 @app.route("/")
 @login_required
 def root():
-	return "hallo"
+	return render_template("index.html")
 
 @app.route("/confirm/AccountRegistration/<token>")
 def confirmAccountRegistration(token):
@@ -114,6 +117,14 @@ def confirmAccountRegistration(token):
 		return redirect("/login") #add friendly token page?
 	except InvalidToken:
 		return "Token invalid"
+
+@app.route("/upload", methods=["POST"])
+@login_required
+def fileUpload():
+	f = FileFactory(app)
+	t = f.addFiles()
+	print(t)
+	return redirect("/")
 
 @app.teardown_appcontext
 def closeDB(error):
