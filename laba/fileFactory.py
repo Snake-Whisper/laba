@@ -61,9 +61,14 @@ class FileFactory():
     
     def getFile(self, id):
         """returns ['name':filename, 'url':url] for file with id"""
-        res = self.queryOne("SELECT chks, salt, name FROM files WHERE id=%s", id)
-        assert res, "This messgae should never be visible..."
-        return {'name':res["name"], 'url':self.__generate_url(res["chks"], res["salt"])}
+        res = self.queryOne("""SELECT craft_url(chks, salt, %s, %s) AS url, name
+                               FROM files
+                               WHERE id=%s""",
+                               (self.app.config["DATADIR"],
+                               self.app.config["FILEDIR_DEEP"],
+                               id))
+        assert res, "This message should never be visible..."
+        return res
 
 
     def __generate_url(self, chks, salt):

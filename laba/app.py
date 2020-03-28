@@ -2,6 +2,7 @@ from flask import Flask, render_template, g, redirect, request, flash
 import pymysql
 import redis
 from user import *
+from chat import *
 from functools import wraps
 from validate_email import validate_email
 from fileFactory import FileFactory
@@ -16,7 +17,7 @@ app.config.update(
 	AUTO_LOGOUT = 43200,
 	TOKEN_TIMEOUT = 60,
 	MAX_CONTENT_LENGTH = 30 * 1024 * 1024,
-	DATADIR = "static/files",
+	DATADIR = "static/files/",
 	DB_USER = "laba",
 	DB_DB = "laba",
 	DB_PWD = "brUQJD1sAYeQaeuJ",
@@ -108,6 +109,9 @@ def register():
 @app.route("/")
 @login_required
 def root():
+	c = Chat(app)
+	c.chat = 3
+	print(c.loadNextChatEntries())
 	return render_template("index.html")
 
 @app.route("/confirm/AccountRegistration/<token>")
@@ -129,7 +133,7 @@ def fileUpload():
 	#assert 'chatID' in request
 	#TODO: Make chat Entry
 	#TODO: Tell others in chat file send?
-	print(f.getFile(16))
+	print(f.getFile(10))
 	return "ok"
 
 @app.teardown_appcontext
@@ -166,9 +170,14 @@ def initdb():
 		for query in f.read().split(";")[:-1]:
 			print(query)
 			c.execute(query)
-		f.close() 
-		c.close()
-		g.db.commit() #manual tear down!
+		f.close()
+	with app.open_resource('functions.sql', mode='r') as f:	
+		for query in f.read().split("$$")[:-1]:
+			print(query)
+			c.execute(query)		
+		f.close()
+	c.close()
+	g.db.commit() #manual tear down!
 
 @app.cli.command('randFill')
 def randomFill():
@@ -178,8 +187,13 @@ def randomFill():
 			print(query)
 			c.execute(query)
 		f.close() 
-		c.close()
-		g.db.commit() #manual tear down!
+	with app.open_resource('functions.sql', mode='r') as f:	
+		for query in f.read().split("$$")[:-1]:
+			print(query)
+			c.execute(query)		
+		f.close()
+	c.close()
+	g.db.commit() #manual tear down!
 
 @app.cli.command('reset')
 def reset():
@@ -189,9 +203,14 @@ def reset():
 			print(query)
 			c.execute(query)
 		f.close()
+	with app.open_resource('functions.sql', mode='r') as f:	
+		for query in f.read().split("$$")[:-1]:
+			print(query)
+			c.execute(query)		
+		f.close()
 	with app.open_resource('testdata.sql', mode='r') as f:
 		for query in f.read().split(";")[:-1]:
-			print(query)
+			#print(query)
 			c.execute(query)
 		f.close() 
 	c.close()
