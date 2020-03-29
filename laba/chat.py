@@ -20,6 +20,12 @@ class Chat():
     def queryOne(self, query, param = ()):
 	    self.cursor.execute(query, param)
 	    return self.cursor.fetchone()
+    
+    def recover(self):
+        """Call to prevent pymysql Interface error after recovering from session cache"""
+        if not hasattr(g, 'db'):
+            g.db = pymysql.connect(user=self.app.config["DB_USER"], db=self.app.config["DB_DB"], password=self.app.config["DB_PWD"], host=self.app.config["DB_HOST"], cursorclass=pymysql.cursors.DictCursor)
+        self.cursor = g.db.cursor()
 
     def __getChats(self):
         return [i["chatid"] for i in self.query("SELECT chatid FROM chatMembers WHERE userid=%s", self.user.id)]
@@ -117,15 +123,32 @@ class Chat():
     @property
     def chat(self):
         return self.__currentChat
-
-    @chat.setter
-    def chat(self, chatId):
+#
+#    @chat.setter
+#    def chat(self, chatId):
+#        if chatId in self.__chats:
+#            self.__currentChat = chatId
+#            print("gesetzt 1")
+#            return
+#        self.__getChats() #refresh
+#        if chatId in self.__chats:
+#            self.__currentChat = chatId
+#            self.__counter = 0
+#            print("gesetzt 2")
+#            return
+#        print("chat invalid, raising")
+#        return NotInChat(self.user.username, chatId)
+    
+    def setChat(self, chatId):
         if chatId in self.__chats:
             self.__currentChat = chatId
+            print("gesetzt 1")
             return
         self.__getChats() #refresh
         if chatId in self.__chats:
             self.__currentChat = chatId
             self.__counter = 0
+            print("gesetzt 2")
             return
+        print("chat invalid, raising")
         return NotInChat(self.user.username, chatId)
