@@ -45,7 +45,7 @@ class Chat():
         res = {}
         res["chatEntries"] = self.query(sql, (self.__currentChat, self.__counter, self.__counter+5))
 
-        #WARNING: Files sorted reverse! In Js at resolution just file.pop...
+        #WARNING: Files sorted reverse! In Js at mapping just file.pop...
 
         sql = """SELECT craft_url(chks, salt, %s, %s), name
         FROM files, chatEntries
@@ -62,7 +62,49 @@ class Chat():
                         self.__counter+5))
         self.__counter += 5
         return res
-        
+    
+    def makeChatTextEntry(self, content):
+        sql = """INSERT INTO chatEntries (author, chatID, content) VALUES(%s, %s, %s, %s)"""
+        self.cursor.execute(sql, (g.user.id, self.__currentChat, content))
+        g.db.commit()
+
+    def makeChatFileEntry(self, content, fileid):
+        sql = """INSERT INTO chatEntries (author, chatID, content, file) VALUES(%s, %s, %s, %s)"""
+        self.cursor.execute(sql, (g.user.id, self.__currentChat, content, fileid))
+        g.db.commit()
+    
+    def makeChat(self, chatname, description):
+        if len(chatname) > 50:
+            raise ChatNameToLong
+        sql="""INSERT INTO chats (name, owner, description) VALUES (%s, %s, %s)"""
+        self.cursor.execute(sql, (chatname, g.user.id, description))
+        self.cursor.execute("INSERT INTO chatMembers (userid, chatid) VALUESE (%s, %s)", (g.user.id, self.__currentChat))
+        self.cursor.execute("INSERT INTO chatAdmins (userid, chatid) VALUESE (%s, %s)", (g.user.id, self.__currentChat))
+        g.db.commit()
+    
+    def isAdmin(self):
+        sql = "SELECT userid FROM chatAdmins WHERE userid=%s AND chatid=%s"
+        return bool(self.queryOne(sql, (g.user.id, self.__currentChat)))
+    
+    def getMemebers(self):
+        sql = """SELECT users.username FROM users, chatMembers WHERE chatid = %s AND users.id = chatMembers.userid"""
+        return [i['username'] for i in self.query(sql, (self.__currentChat))]
+    
+    def addMembers(self, memberlist):
+        if not self.isAdmin():
+            raise NotAdmin
+        data = [(x, self.__currentChat) for x in memberlist]
+        #TODO: check against duplicates
+        sql = "INSERT INTO chatAdmin (userid, chatid) VALUES ((SELECT id FROM users WHERE username=%s)), %s)"
+        self.cursor.executemany(sql, data)
+    
+    #def delMembers(self, memberlist):
+    #    if not self.isAdmin():
+    #        raise NotAdmin
+        #data = [(x, self.__currentChat) for x in memberlist]
+        #TODO: check against duplicates
+        #sql = "INSERT INTO chatAdmin (userid, chatid) VALUES ((SELECT id FROM users WHERE username=%s)), %s)"
+        #self.cursor.executemany(sql, data)
 
 
     #@property
