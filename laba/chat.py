@@ -5,13 +5,13 @@ from exceptions.chatExceptions import *
 class Chat():
     __counter = 0
     __currentChat = -1
-    def __init__(self, app):
-        assert hasattr(g, "user") and g.user.health, "Something very nesty is going on. When in Productiomode take Laba-Server immediately down and contact dev!"
+    def __init__(self, app, user):
+        self.user = user
         self.app = app
         if not hasattr(g, 'db'):
             g.db = pymysql.connect(user=app.config["DB_USER"], db=app.config["DB_DB"], password=app.config["DB_PWD"], host=app.config["DB_HOST"], cursorclass=pymysql.cursors.DictCursor)
         self.cursor = g.db.cursor()
-        self.__chats = self.getChats()
+        self.__chats = self.__getChats()
     
     def query(self, query, param = ()):
 	    self.cursor.execute(query, param)
@@ -21,13 +21,16 @@ class Chat():
 	    self.cursor.execute(query, param)
 	    return self.cursor.fetchone()
 
+    def __getChats(self):
+        return [i["chatid"] for i in self.query("SELECT chatid FROM chatMembers WHERE userid=%s", self.user.id)]
+    
     def getChats(self):
-        return [i["chatid"] for i in self.query("SELECT chatid FROM chatMembers WHERE userid=%s", g.user.id)]
+        return self.query("SELECT id, name FROM chats, chatMembers WHERE userid=%s AND chats.id=chatMembers.chatid", self.user.id)
     
     def __contains__(self, chatId):
         if chatId in self.__chats:
             return True
-        self.__chats = self.getChats() #refresh
+        self.__chats = self.__getChats() #refresh
         if chatId in self.__chats:
             return True
         return False
@@ -65,26 +68,26 @@ class Chat():
     
     def makeChatTextEntry(self, content):
         sql = """INSERT INTO chatEntries (author, chatID, content) VALUES(%s, %s, %s, %s)"""
-        self.cursor.execute(sql, (g.user.id, self.__currentChat, content))
+        self.cursor.execute(sql, (self.user.id, self.__currentChat, content))
         g.db.commit()
 
     def makeChatFileEntry(self, content, fileid):
         sql = """INSERT INTO chatEntries (author, chatID, content, file) VALUES(%s, %s, %s, %s)"""
-        self.cursor.execute(sql, (g.user.id, self.__currentChat, content, fileid))
+        self.cursor.execute(sql, (self.user.id, self.__currentChat, content, fileid))
         g.db.commit()
     
     def makeChat(self, chatname, description):
         if len(chatname) > 50:
             raise ChatNameToLong
         sql="""INSERT INTO chats (name, owner, description) VALUES (%s, %s, %s)"""
-        self.cursor.execute(sql, (chatname, g.user.id, description))
-        self.cursor.execute("INSERT INTO chatMembers (userid, chatid) VALUESE (%s, %s)", (g.user.id, self.__currentChat))
-        self.cursor.execute("INSERT INTO chatAdmins (userid, chatid) VALUESE (%s, %s)", (g.user.id, self.__currentChat))
+        self.cursor.execute(sql, (chatname, self.user.id, description))
+        self.cursor.execute("INSERT INTO chatMembers (userid, chatid) VALUESE (%s, %s)", (self.user.id, self.__currentChat))
+        self.cursor.execute("INSERT INTO chatAdmins (userid, chatid) VALUESE (%s, %s)", (self.user.id, self.__currentChat))
         g.db.commit()
     
     def isAdmin(self):
         sql = "SELECT userid FROM chatAdmins WHERE userid=%s AND chatid=%s"
-        return bool(self.queryOne(sql, (g.user.id, self.__currentChat)))
+        return bool(self.queryOne(sql, (self.user.id, self.__currentChat)))
     
     def getMemebers(self):
         sql = """SELECT users.username FROM users, chatMembers WHERE chatid = %s AND users.id = chatMembers.userid"""
@@ -120,9 +123,9 @@ class Chat():
         if chatId in self.__chats:
             self.__currentChat = chatId
             return
-        self.getChats() #refresh
+        self.__getChats() #refresh
         if chatId in self.__chats:
             self.__currentChat = chatId
             self.__counter = 0
             return
-        return NotInChat(g.user.username, chatId)
+        return NotInChat(self.user.username, chatId)
