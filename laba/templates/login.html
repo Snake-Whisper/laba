@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset='utf-8'>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Login - laba</title>
+		<!-- <link rel=stylesheet type=text/css href="{{ url_for('static', filename='login.css') }}"> -->
+	</head>
+	<body>
+		<div id='login'>
+			<form action="{{ url_for("login")}}" method=post>
+				<dl>
+					<dt>Username:
+					<dd><input type=text name=username>
+					<dt>Passwort:
+					<dd><input type=password name=password>
+					{% for message in get_flashed_messages() %}
+            		<div class=flash>{{ message }}</div>
+            		{% endfor %}
+					<dd><input type=submit value=Login> or 
+					<a href="{{ url_for("register")}}">register</a>
+				</dl>
+			</form>
+            
+		</div>
+	</body>
+</html>
