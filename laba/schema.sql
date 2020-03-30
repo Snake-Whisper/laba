@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS chats (
 CREATE TABLE IF NOT EXISTS chatMembers (
     chatid INT UNSIGNED NOT NULL REFERENCES chat(id),
     userid INT UNSIGNED NOT NULL REFERENCES user(id),
+    actor INT UNSIGNED NOT NULL REFERENCES user(id),
     ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX(chatid),
     INDEX(userid),
@@ -41,7 +42,7 @@ CREATE TABLE IF NOT EXISTS chatMembers (
 
 CREATE TABLE IF NOT EXISTS chatAdmins (
     chatid INT UNSIGNED NOT NULL REFERENCES chat(id),
-    userid INT UNSIGNED NOT NULL REFERENCES user(id),
+    userid INT UNSIGNED NOT NULL REFERENCES user(id),    
     actor INT UNSIGNED NOT NULL REFERENCES user(id),
     INDEX(chatid),
     INDEX(userid),
