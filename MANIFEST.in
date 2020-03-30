@@ -1,6 +1,15 @@
 graft laba/templates
 graft laba/static
 graft laba/static/files
+graft laba/exceptions
+recursive-include laba/templates *
 include laba/schema.sql
 include laba/testdata.sql
-
+include laba/user.py
+include laba/chat.py
+include laba/wsNamespace.py
+include laba/app.py
+include laba/fileFactory.py
+include laba/exceptions/chatExceptions.py
+include laba/exceptions/userException.py
+include laba/static/api.js
