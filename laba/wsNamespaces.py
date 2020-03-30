@@ -3,7 +3,7 @@ from flask import g, session, request
 from user import RedisUser
 from chat import Chat
 from exceptions.userException import *
-from exceptions.chatExceptions import *
+from exceptions.chatException import *
 from time import strftime
 from json import loads, dumps
 import pymysql

@@ -1,6 +1,6 @@
 from flask import g, session
 import pymysql
-from exceptions.chatExceptions import *
+from exceptions.chatException import *
 
 class Chat():
     __counter = 0
