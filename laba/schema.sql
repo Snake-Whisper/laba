@@ -36,14 +36,16 @@ CREATE TABLE IF NOT EXISTS chatMembers (
     userid INT UNSIGNED NOT NULL REFERENCES user(id),
     ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX(chatid),
-    INDEX(userid)) ENGINE=INNODB;
+    INDEX(userid),
+    UNIQUE (chatid, userid)) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS chatAdmins (
     chatid INT UNSIGNED NOT NULL REFERENCES chat(id),
     userid INT UNSIGNED NOT NULL REFERENCES user(id),
     actor INT UNSIGNED NOT NULL REFERENCES user(id),
     INDEX(chatid),
-    INDEX(userid)) ENGINE=INNODB;
+    INDEX(userid),
+    UNIQUE (chatid, userid)) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS files (
 	id INT unsigned primary key AUTO_INCREMENT,
