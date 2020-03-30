@@ -11,7 +11,7 @@ class Chat():
         if not hasattr(g, 'db'):
             g.db = pymysql.connect(user=app.config["DB_USER"], db=app.config["DB_DB"], password=app.config["DB_PWD"], host=app.config["DB_HOST"], cursorclass=pymysql.cursors.DictCursor)
         self.cursor = g.db.cursor()
-        self.__chats = self.__getChats()
+        self.__chats = self._getChats()
     
     def query(self, query, param = ()):
 	    self.cursor.execute(query, param)
@@ -27,7 +27,7 @@ class Chat():
             g.db = pymysql.connect(user=self.app.config["DB_USER"], db=self.app.config["DB_DB"], password=self.app.config["DB_PWD"], host=self.app.config["DB_HOST"], cursorclass=pymysql.cursors.DictCursor)
         self.cursor = g.db.cursor()
 
-    def __getChats(self):
+    def _getChats(self):
         return [i["chatid"] for i in self.query("SELECT chatid FROM chatMembers WHERE userid=%s", self.user.id)]
     
     def getChats(self):
@@ -36,7 +36,7 @@ class Chat():
     def __contains__(self, chatId):
         if chatId in self.__chats:
             return True
-        self.__chats = self.__getChats() #refresh
+        self.__chats = self._getChats() #refresh
         if chatId in self.__chats:
             return True
         return False
@@ -66,7 +66,7 @@ class Chat():
         return res
     
     def makeChatTextEntry(self, content):
-        sql = """INSERT INTO chatEntries (author, chatID, content) VALUES(%s, %s, %s, %s)"""
+        sql = """INSERT INTO chatEntries (author, chatID, content) VALUES(%s, %s, %s)"""
         self.cursor.execute(sql, (self.user.id, self.__currentChat, content))
         g.db.commit()
 
@@ -137,7 +137,7 @@ class Chat():
             self.__currentChat = chatId
             self.__counter = 0
             return
-        self.__getChats() #refresh cache
+        self._getChats() #refresh cache
         if chatId in self.__chats:
             self.__currentChat = chatId
             self.__counter = 0
