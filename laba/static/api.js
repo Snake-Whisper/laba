@@ -27,8 +27,20 @@ socket.on("loadChatEntries", function(msg) {
     });
 });
 
-//socket.on("addChatEntry")
+socket.on("recvPost", function (msg) {
+    dummy_recvPost(msg.chatId, msg.content, msg.ctime, msg.username);
+})
+
+socket.on("recvFile", function (msg) {
+    dummy_recvFile(msg.chatId, msg.content, msg.ctime, msg.username, msg.filename)
+})
 //socket.on("addChatEntryBot")
+//socket.on('mkAdmin')
+//socket.on('delAdmin')
+//socket.on('addChat')
+//socket.on('delChat')
+
+
 
 socket.on("error", function(msg) {
     console.error(msg);
@@ -37,25 +49,57 @@ socket.on("error", function(msg) {
 function setChat(id) {
     console.log("Cleared Chat Window...")
     socket.emit("setChat", id);
-};
+}
 
-function RecieveMore() {
+function recieveMore() {
     socket.emit("loadNext");
+}
+
+function sendPost(msg) {
+    socket.emit("sendPost", msg)
 }
 
 function dummy_addChat(name, id) {
     console.log("adding chat: " + name + " with id: " + id);
-};
+}
 
 function dummy_disconnect() {
     console.log("Please login.");
-};
+}
 
 function dummy_loadChatEntry(content, ctime, author) {
     //INSERT after FIRST_NODE!!! Entries reverse sorted.
+
+    // < NEW message > <--------
+    // <old message 3>
+    // <old message 2>
+    // <old message 1>
+    // <old message 0>
     console.log("adding chatEntry: " + content
                 + " from: " + ctime
                 + " by " + author);
+}
+
+function dummy_recvPost(chatId, content, ctime, author) {
+    //INSERT before LAST_NODE.
+    //Messages given to this function are following the flow of time.
+    // <old message 3>
+    // <old message 2>
+    // <old message 1>
+    // <old message 0>
+    // < NEW message > <--------
+    console.log("New Message for Chat " + chatId + ": " + content + " (" + author + ", " + ctime + ")");
+}
+
+function dummy_recvFile(chatId, content, ctime, author, url, filename) {
+    //INSERT before LAST_NODE.
+    //Messages given to this function are following the flow of time.
+    // <old message 3>
+    // <old message 2>
+    // <old message 1>
+    // <old message 0>
+    // < NEW message > <--------
+    console.log("New File for Chat " + chatId + ": " + filename + " (" + author + ", " + ctime + ")");
 }
 
 function dummy_loadChatEntryFile(content, ctime, author, name, url) {
