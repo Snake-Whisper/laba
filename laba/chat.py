@@ -54,8 +54,9 @@ class Chat():
         ORDER BY chatEntries.id DESC
         LIMIT %s,%s
         """
-
-        res["chatEntries"] = self.query(sql, (self.__currentChat, self.__counter, self.__counter+5))
+        
+        res["chatEntries"] = self.query(sql, (self.__currentChat, self.__counter, self.app.config["CHAT_BLOCK_ROWS"]))
+        #TODO: use fileFactory? Remember Cursor die....
         res["files"] = [self.queryOne("""SELECT craft_url(chks, salt, %s, %s) AS url, name FROM files WHERE id=%s""",
                                (self.app.config["DATADIR"],
                                self.app.config["FILEDIR_DEEP"],

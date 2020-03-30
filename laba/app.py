@@ -7,6 +7,8 @@ from functools import wraps
 from validate_email import validate_email
 from fileFactory import FileFactory
 from json import loads, dumps
+from flask_socketio import SocketIO
+from wsNamespaces import *
 
 
 app = Flask(__name__)
@@ -26,8 +28,12 @@ app.config.update(
 	REDIS_DB = 0,
 	REDIS_PORT = 6379,
 	SALT_LENGHT = 10,
-	FILEDIR_DEEP = 3
+	FILEDIR_DEEP = 3,
+	CHAT_BLOCK_ROWS = 5
 )
+
+socketio = SocketIO(app)
+socketio.on_namespace(ChatNamespace("/chat", app))
 
 def login_required(f):
 	@wraps(f)
@@ -109,9 +115,6 @@ def register():
 @app.route("/")
 @login_required
 def root():
-	c = Chat(app)
-	c.chat = 3
-	print(c.loadNextChatEntries())
 	return render_template("index.html")
 
 @app.route("/confirm/AccountRegistration/<token>")
@@ -133,7 +136,6 @@ def fileUpload():
 	#assert 'chatID' in request
 	#TODO: Make chat Entry
 	#TODO: Tell others in chat file send?
-	print(f.getFile(10))
 	return "ok"
 
 @app.teardown_appcontext
@@ -217,4 +219,5 @@ def reset():
 	g.db.commit()
 
 if __name__ == "__main__":
-	app.run(debug=True)
+	#app.run(debug=True)
+	socketio.run(app, debug=True, use_reloader=True)
