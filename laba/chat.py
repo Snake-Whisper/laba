@@ -42,11 +42,13 @@ class Chat():
         return False
     
     def loadNextChatEntries(self):
-        sql = """SELECT username, DATE_FORMAT(chatEntries.ctime, '%%e %%b, %%H:%%i') AS ctime, content, file
-        FROM users, chatEntries
+        sql = """SELECT username, DATE_FORMAT(chatEntries.ctime, '%%e %%b, %%H:%%i') AS ctime, content, files.name
+        FROM users, chatEntries, files
         WHERE
         chatEntries.chatID = %s AND
         users.id = chatEntries.author AND
+        chatEntries.file = NULL OR
+        chatEntries.file = files.id AND
         chatEntries.del = False
         ORDER BY chatEntries.id DESC
         LIMIT %s,%s
@@ -56,19 +58,21 @@ class Chat():
 
         #WARNING: Files sorted reverse! In Js at mapping just file.pop...
 
-        sql = """SELECT craft_url(chks, salt, %s, %s), name
-        FROM files, chatEntries
-        WHERE
-        chatEntries.chatID = %s AND
-        chatEntries.del = False
-        ORDER BY chatEntries.id ASC
-        LIMIT %s,%s
-        """
-        res["files"] = self.query(sql, (self.app.config["DATADIR"],
-                        self.app.config["FILEDIR_DEEP"],
-                        self.__currentChat,
-                        self.__counter,
-                        self.__counter+5))
+        #sql = """SELECT craft_url(chks, salt, %s, %s) AS url, name
+        #FROM files, chatEntries
+        #WHERE
+        #chatEntries.file = files.id AND
+        #chatEntries.chatID = %s AND
+        #chatEntries.del = False AND
+        #files.id IN (SELECT )
+        #ORDER BY chatEntries.id ASC
+        #LIMIT %s,%s
+        #"""
+        #res["files"] = self.query(sql, (self.app.config["DATADIR"],
+        #                self.app.config["FILEDIR_DEEP"],
+        #                self.__currentChat,
+        #                self.__counter,
+        #                self.__counter+5))
         self.__counter += 5
         return res
     
@@ -142,13 +146,11 @@ class Chat():
     def setChat(self, chatId):
         if chatId in self.__chats:
             self.__currentChat = chatId
-            print("gesetzt 1")
+            self.__counter = 0
             return
-        self.__getChats() #refresh
+        self.__getChats() #refresh cache
         if chatId in self.__chats:
             self.__currentChat = chatId
             self.__counter = 0
-            print("gesetzt 2")
             return
-        print("chat invalid, raising")
-        return NotInChat(self.user.username, chatId)
+        raise NotInChat(self.user.username, chatId)
