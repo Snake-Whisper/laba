@@ -42,19 +42,48 @@ class Chat():
         return False
     
     def loadNextChatEntries(self):
-        sql = """SELECT username, DATE_FORMAT(chatEntries.ctime, '%%e %%b, %%H:%%i') AS ctime, content, files.name
+        #sqla = """SELECT username, DATE_FORMAT(chatEntries.ctime, '%%e %%b, %%H:%%i') AS ctime, content, files.name, craft_url(files.chks, files.salt, %s, %s) AS url
+        #FROM users, chatEntries, files
+        #WHERE
+        #chatEntries.chatID = %s AND
+        #users.id = chatEntries.author AND
+        #(chatEntries.file IS NULL OR
+        #chatEntries.file = files.id) AND
+        #chatEntries.del = False
+        #ORDER BY chatEntries.id DESC
+        #LIMIT %s,%s
+        #"""
+
+        res = {}
+
+        sql = """SELECT username, DATE_FORMAT(chatEntries.ctime, '%%e %%b, %%H:%%i') AS ctime, content, file
+        FROM users, chatEntries
+        WHERE
+        chatEntries.chatID = %s AND
+        users.id = chatEntries.author AND
+        chatEntries.del = False
+        ORDER BY chatEntries.id DESC
+        LIMIT %s,%s
+        """
+
+        res["chatEntries"] = self.query(sql, (self.__currentChat, self.__counter, self.__counter+5))
+
+        sql = """SELECT username, DATE_FORMAT(chatEntries.ctime, '%%e %%b, %%H:%%i') AS ctime, content, files.name, craft_url(files.chks, files.salt, %s, %s) AS url
         FROM users, chatEntries, files
         WHERE
         chatEntries.chatID = %s AND
         users.id = chatEntries.author AND
-        chatEntries.file = NULL OR
         chatEntries.file = files.id AND
         chatEntries.del = False
         ORDER BY chatEntries.id DESC
         LIMIT %s,%s
         """
-        res = {}
-        res["chatEntries"] = self.query(sql, (self.__currentChat, self.__counter, self.__counter+5))
+
+        #res["files"] = self.query(sql, (self.app.config["DATADIR"], self.app.config["FILEDIR_DEEP"], self.__currentChat, self.__counter, self.__counter+5))
+        res["files"] = [self.queryOne("""SELECT craft_url(chks, salt, %s, %s) AS url, name FROM files WHERE id=%s""",
+                               (self.app.config["DATADIR"],
+                               self.app.config["FILEDIR_DEEP"],
+                               entry["file"])) for entry in res["chatEntries"] if entry["file"] != None]
 
         #WARNING: Files sorted reverse! In Js at mapping just file.pop...
 
