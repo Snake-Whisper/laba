@@ -34,10 +34,14 @@ socket.on("recvPost", function (msg) {
 socket.on("recvFile", function (msg) {
     dummy_recvFile(msg.chatId, msg.content, msg.ctime, msg.username, msg.filename)
 })
+
+socket.on('addChat', function (msg) {
+    dummy_addChat(msg.name, msg.id)
+})
+
 //socket.on("addChatEntryBot")
 //socket.on('mkAdmin')
 //socket.on('delAdmin')
-//socket.on('addChat')
 //socket.on('delChat')
 
 
@@ -49,6 +53,10 @@ socket.on("error", function(msg) {
 function setChat(id) {
     console.log("Cleared Chat Window...")
     socket.emit("setChat", id);
+}
+
+function mkChat(chatname) {
+    socket.emit("mkChat", chatname)
 }
 
 function recieveMore() {

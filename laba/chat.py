@@ -75,14 +75,17 @@ class Chat():
         self.cursor.execute(sql, (self.user.id, self.__currentChat, content, fileid))
         g.db.commit()
     
-    def makeChat(self, chatname, description):
+    def makeChat(self, chatname):
         if len(chatname) > 50:
             raise ChatNameToLong
-        sql="""INSERT INTO chats (name, owner, description) VALUES (%s, %s, %s)"""
-        self.cursor.execute(sql, (chatname, self.user.id, description))
-        self.cursor.execute("INSERT INTO chatMembers (userid, chatid) VALUESE (%s, %s)", (self.user.id, self.__currentChat))
-        self.cursor.execute("INSERT INTO chatAdmins (userid, chatid) VALUESE (%s, %s)", (self.user.id, self.__currentChat))
+        sql="""INSERT INTO chats (name, owner) VALUES (%s, %s)"""
+        self.cursor.execute(sql, (chatname, self.user.id))
+        chatid = self.cursor.lastrowid
+        print(chatid)
+        self.cursor.execute("INSERT INTO chatMembers (userid, chatid, actor) VALUES (%s, %s, %s)", (self.user.id, chatid, self.user.id))
+        self.cursor.execute("INSERT INTO chatAdmins (userid, chatid, actor) VALUES (%s, %s, %s)", (self.user.id, chatid, self.user.id))
         g.db.commit()
+        return chatid
     
     def isAdmin(self):
         sql = "SELECT userid FROM chatAdmins WHERE userid=%s AND chatid=%s"
@@ -96,8 +99,8 @@ class Chat():
         if not self.isAdmin():
             raise NotAdmin
         data = [(x, self.__currentChat) for x in memberlist]
-        #TODO: check against duplicates
-        sql = "INSERT INTO chatAdmin (userid, chatid) VALUES ((SELECT id FROM users WHERE username=%s)), %s)"
+        #TODO: catch error at duplicates
+        sql = "INSERT INTO chatMembers (userid, chatid) VALUES ((SELECT id FROM users WHERE username=%s)), %s)"
         self.cursor.executemany(sql, data)
     
     #def delMembers(self, memberlist):

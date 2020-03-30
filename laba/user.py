@@ -21,6 +21,7 @@ class User():
 
     def _init(self, app):
         """User Object"""
+        self.app = app
         if not hasattr(g, 'db'):
             g.db = pymysql.connect(user=app.config["DB_USER"], db=app.config["DB_DB"], password=app.config["DB_PWD"], host=app.config["DB_HOST"], cursorclass=pymysql.cursors.DictCursor)
         self.cursor = g.db.cursor()
@@ -44,6 +45,14 @@ class User():
     def queryOne(self, query, param = ()):
 	    self.cursor.execute(query, param)
 	    return self.cursor.fetchone()
+    
+    @property
+    def wsuuid(self):
+        return g.redis.get(self._values["username"])
+    
+    @wsuuid.setter
+    def wsuuid(self, wsuuid):
+        g.redis.set(self._values["username"], wsuuid, self.app.config["AUTO_LOGOUT"])
 
     @property
     def id(self):

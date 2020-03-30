@@ -1,5 +1,5 @@
 from flask_socketio import Namespace, emit, disconnect, join_room, leave_room, close_room
-from flask import g, session
+from flask import g, session, request
 from user import RedisUser
 from chat import Chat
 from exceptions.userException import *
@@ -22,6 +22,10 @@ class ChatNamespace(Namespace):
                 emit("error", "chat: get lost. You are not logged in.")
                 disconnect()
                 return
+        #print(dir(request))
+        #print(dir(session))
+
+        session["user"].wsuuid = request.sid
         for chat in session["chat"]._getChats():
             print("adding user {0} to chat {1}".format(session["user"].username, chat) )
             join_room(str(chat))
@@ -57,4 +61,14 @@ class ChatNamespace(Namespace):
 				  }
         print(packet)
         emit("recvPost", packet, room=str(session["chat"].chat))
+    
+    def on_mkChat(self, msg):
+        session["chat"].recover()
+        id = session["chat"].makeChat(msg)
+        packet = {
+            "name" : msg,
+            "id" : id
+        }
+        print(packet)
+        emit("addChat", packet)
 
