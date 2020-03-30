@@ -12,13 +12,13 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/snake-whisper/laba",
-    install_requieres=["pymysql", "redis", "Flask", "Flask-SocketIO", "validate-email", "eventlet"],
-    install_requieres=True,
-    packages=['laba-server']
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-    ],
-    python_requires='>=3.6',
+    install_requires=["pymysql", "redis", "Flask", "Flask-SocketIO", "validate-email", "eventlet"],
+    include_package_data=True,
+    packages=['laba-server'],
+#    classifiers=[
+#        "Programming Language :: Python :: 3",
+#        "License :: OSI Approved :: MIT License",
+#        "Operating System :: OS Independent",
+#    ],
+    python_requires='>=3.6'
 )
