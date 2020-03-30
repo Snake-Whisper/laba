@@ -26,13 +26,22 @@ socket.on("loadChatEntries", function(msg) {
         }
     });
 });
-//socket.on("loadChatEntriesHistory")
+
 //socket.on("addChatEntry")
 //socket.on("addChatEntryBot")
 
 socket.on("error", function(msg) {
     console.error(msg);
 });
+
+function setChat(id) {
+    console.log("Cleared Chat Window...")
+    socket.emit("setChat", id);
+};
+
+function RecieveMore() {
+    socket.emit("loadNext");
+}
 
 function dummy_addChat(name, id) {
     console.log("adding chat: " + name + " with id: " + id);
@@ -42,17 +51,8 @@ function dummy_disconnect() {
     console.log("Please login.");
 };
 
-function dummy_sendSetChat(id) {
-    console.log("Cleared Chat Window...")
-    socket.emit("setChat", id);
-};
-
-function dummy_sendRecieveMore() {
-    socket.emit("loadNext");
-}
-
 function dummy_loadChatEntry(content, ctime, author) {
-    //INSERT after FIRST_NODE!!! Entrys reverse sorted.
+    //INSERT after FIRST_NODE!!! Entries reverse sorted.
     console.log("adding chatEntry: " + content
                 + " from: " + ctime
                 + " by " + author);
