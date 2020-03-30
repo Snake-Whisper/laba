@@ -145,7 +145,7 @@ class User():
         return dumps(self._values)
     
     def commit2redis(self):
-        g.redis.set(self._uuid, self.__serialize(), 300)
+        g.redis.set(self._uuid, self.__serialize(), self.app.config["AUTO_LOGOUT"])
     
     def logOut(self):
         self.__loggedIn = False

@@ -16,7 +16,7 @@ app = Flask(__name__)
 app.config.update(
     SECRET_KEY = '\x81H\xb8\xa3S\xf8\x8b\xbd"o\xca\xd7\x08\xa4op\x07\xb5\xde\x87\xb8\xcc\xe8\x86\\\xffS\xea8\x86"\x97',
 	REDIS_URL = "redis://localhost:6379/0",
-	AUTO_LOGOUT = 43200,
+	AUTO_LOGOUT = 60*20,
 	TOKEN_TIMEOUT = 60,
 	MAX_CONTENT_LENGTH = 30 * 1024 * 1024,
 	DATADIR = "static/files/",
@@ -220,4 +220,4 @@ def reset():
 
 if __name__ == "__main__":
 	#app.run(debug=True)
-	socketio.run(app, debug=True, use_reloader=True)
+	socketio.run(app, debug=True, use_reloader=True, host="0.0.0.0")
