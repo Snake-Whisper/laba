@@ -6,6 +6,7 @@ from exceptions.userException import *
 from exceptions.chatExceptions import *
 from time import strftime
 from json import loads, dumps
+import pymysql
 
 class ChatNamespace(Namespace):
     def __init__(self, namespace, app):
@@ -71,4 +72,28 @@ class ChatNamespace(Namespace):
         }
         print(packet)
         emit("addChat", packet)
+    
+    def call(self, username, event, msg):
+        if not hasattr(g, 'redis'):
+            g.redis = redis.Redis(host=app.config["REDIS_HOST"], port=app.config["REDIS_PORT"], db=app.config["REDIS_DB"])
+        sid = g.redis.get(username)
+        if not sid:
+            return
+        emit(event, msg, room=sid)
+    
+    def on_addMember(self, msg):
+        session["chat"].recover()
+        session["user"].recover()
+        try:
+            session["chat"].addMember(msg)
+            print("ok")
+        except NotAdmin:
+            emit("error", "You're not an Admin for this Chat")
+            return
+        except pymysql.IntegrityError:
+            emit ("error", "User {0} is already member".format(msg))
+            return
+        self.call(msg, "addChat", session["chat"].chat)
+        
+
 

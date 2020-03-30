@@ -67,6 +67,10 @@ function sendPost(msg) {
     socket.emit("sendPost", msg)
 }
 
+function addMember(username) {
+    socket.emit("addMember", username);
+}
+
 function dummy_addChat(name, id) {
     console.log("adding chat: " + name + " with id: " + id);
 }

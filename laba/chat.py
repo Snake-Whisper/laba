@@ -103,6 +103,14 @@ class Chat():
         sql = "INSERT INTO chatMembers (userid, chatid) VALUES ((SELECT id FROM users WHERE username=%s)), %s)"
         self.cursor.executemany(sql, data)
     
+    def addMember(self, member):
+        if not self.isAdmin():
+            raise NotAdmin
+        #data = [(x, self.__currentChat) for x in memberlist]
+        #TODO: catch error at duplicates
+        sql = "INSERT INTO chatMembers (userid, chatid, actor) VALUES ((SELECT id FROM users WHERE username=%s), %s, %s)"
+        self.cursor.execute(sql, (member, self.__currentChat, self.user.id))
+    
     #def delMembers(self, memberlist):
     #    if not self.isAdmin():
     #        raise NotAdmin

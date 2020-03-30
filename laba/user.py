@@ -46,6 +46,12 @@ class User():
 	    self.cursor.execute(query, param)
 	    return self.cursor.fetchone()
     
+    def recover(self):
+        """Call to prevent pymysql Interface error after recovering from session cache"""
+        if not hasattr(g, 'db'):
+            g.db = pymysql.connect(user=self.app.config["DB_USER"], db=self.app.config["DB_DB"], password=self.app.config["DB_PWD"], host=self.app.config["DB_HOST"], cursorclass=pymysql.cursors.DictCursor)
+        self.cursor = g.db.cursor()
+    
     @property
     def wsuuid(self):
         return g.redis.get(self._values["username"])
