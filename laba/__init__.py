@@ -1,1 +1,1 @@
-from .laba-server import app
+from .laba import app
