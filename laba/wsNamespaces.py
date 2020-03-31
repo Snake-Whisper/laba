@@ -1,4 +1,4 @@
-from flask_socketio import Namespace, emit, disconnect, join_room, leave_room, close_room
+from flask_socketio import Namespace, emit, disconnect, join_room, leave_room, close_room, rooms
 from flask import g, session, request
 from user import RedisUser
 from chat import Chat
@@ -27,7 +27,7 @@ class ChatNamespace(Namespace):
         emit('loadChatList', list(session["chat"].getChats()))
         session["user"].wsuuid = request.sid
         for chat in session["chat"]._getChats():
-            print("adding user {0} to chat {1}".format(session["user"].username, chat) )
+            #print("adding user {0} to chat {1}".format(session["user"].username, chat) )
             join_room(str(chat))
 
     def on_disconnect(self):
@@ -80,7 +80,7 @@ class ChatNamespace(Namespace):
     def call(self, username, event, msg):
         if not hasattr(g, 'redis'):
             g.redis = redis.Redis(host=app.config["REDIS_HOST"], port=app.config["REDIS_PORT"], db=app.config["REDIS_DB"])
-        sid = g.redis.get(username)
+        sid = g.redis.get(username).decode()
         if not sid:
             return
         emit(event, msg, room=sid)
@@ -90,14 +90,19 @@ class ChatNamespace(Namespace):
         session["user"].recover()
         try:
             session["chat"].addMember(msg)
-            print("ok")
         except NotAdmin:
             emit("error", "You're not an Admin for this Chat")
             return
         except pymysql.IntegrityError:
             emit ("error", "User {0} is already member".format(msg))
             return
-        self.call(msg, "addChat", session["chat"].chat)
-        
-
-
+        package = {
+            "id" : session["chat"].chat,
+            "name" : session["chat"].name
+        }
+        self.call(msg, "addChat", package)
+        package = {"ctime" : strftime("%d %b, %H:%M"), 
+			"content" : "{0} added you".format(session["user"].username),
+			"chatId" : session["chat"].chat,
+		 }
+        self.call(msg, "addChatEntryBot", package)

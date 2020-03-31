@@ -10,6 +10,7 @@ socket.on('disconnect', function() {
 });
 
 socket.on("loadChatList", function(msg) {
+    console.log(msg);
     msg.forEach(chat => {
         dummy_addChat(chat.name, chat.id);
     });
@@ -36,10 +37,13 @@ socket.on("recvFile", function (msg) {
 })
 
 socket.on('addChat', function (msg) {
+    console.log(msg);
     dummy_addChat(msg.name, msg.id)
 })
 
-//socket.on("addChatEntryBot")
+socket.on("addChatEntryBot", function (msg) {
+    dummy_botEntry(msg.chatId, msg.content, msg.ctime);
+})
 //socket.on('mkAdmin')
 //socket.on('delAdmin')
 //socket.on('delChat')
@@ -121,4 +125,8 @@ function dummy_loadChatEntryFile(content, ctime, author, name, url) {
                 + " by " + author
                 + " comment: " + content
                 + " url: " + url);
+}
+
+function dummy_botEntry(chatId, content, ctime) {
+    console.log("Botentry for chat " + chatId + ": " + content);
 }

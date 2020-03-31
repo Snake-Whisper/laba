@@ -3,6 +3,8 @@ import pymysql
 from exceptions.chatExceptions import *
 
 class Chat():
+    __values = {}
+    __changed = {}
     __counter = 0
     __currentChat = -1
     def __init__(self, app, user):
@@ -142,15 +144,56 @@ class Chat():
 #            return
 #        print("chat invalid, raising")
 #        return NotInChat(self.user.username, chatId)
+
+    def updateValues(self):
+        self.__values = self.queryOne("SELECT name, owner, ctime, icon, descript FROM chats WHERE id=%s" , self.__currentChat)
+
+    @property
+    def name(self):
+        return self.__values["name"]
+    @name.setter
+    def name(self, value):
+        if self.__values["name"] != value:
+            self.__values["name"] = value
+            self.__changed["name"] = value
+    
+    @property
+    def ctime(self):
+        return self.__values["ctime"]
+    @property
+    def author(self):
+        return self.__values["author"]
+    @property
+    def description(self):
+        return self.__values["descript"]
+    @description.setter
+    def description(self, value):
+        if self.__values["descrip"] != value:
+            self.__values["descrip"] = value
+            self.__changes["descrip"] = value
+    
+    def commit2db(self):
+        if self.__changed:
+            print("commiting...")
+            sql="UPDATE chats SET {0} WHERE chats.id = {1}".format(", ".join(i+"=%s" for i in self.__changed.keys()), self.__currentChat)
+            self.query(sql, tuple(self.__changed.values()))
+
+    def __del__(self):
+        self.commit2db()
+        #print("Chat obj is going down....")
+    
+    #TODO: add icon
     
     def setChat(self, chatId):
         if chatId in self.__chats:
             self.__currentChat = chatId
             self.__counter = 0
+            self.updateValues()
             return
         self._getChats() #refresh cache
         if chatId in self.__chats:
             self.__currentChat = chatId
             self.__counter = 0
+            self.updateValues()
             return
         raise NotInChat(self.user.username, chatId)
