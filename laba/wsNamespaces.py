@@ -18,20 +18,23 @@ class ChatNamespace(Namespace):
             try:
                 session['user'] = RedisUser(self.app)
                 session['chat'] = Chat(self.app, session['user'])
-                emit('loadChatList', session["chat"].getChats())
+                #print(list(session["chat"].getChats()))
             except UserNotInitialized:
                 emit("error", "chat: get lost. You are not logged in.")
                 disconnect()
                 return
-        #print(dir(request))
-        #print(dir(session))
 
+        emit('loadChatList', list(session["chat"].getChats()))
         session["user"].wsuuid = request.sid
         for chat in session["chat"]._getChats():
             print("adding user {0} to chat {1}".format(session["user"].username, chat) )
             join_room(str(chat))
 
     def on_disconnect(self):
+        session["user"].recover()
+        session["chat"].recover()
+        session.pop("user")
+        session.pop("chat")
         print("recieved disconnection")
 
     def on_setChat(self, msg):

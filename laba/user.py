@@ -51,6 +51,8 @@ class User():
         if not hasattr(g, 'db'):
             g.db = pymysql.connect(user=self.app.config["DB_USER"], db=self.app.config["DB_DB"], password=self.app.config["DB_PWD"], host=self.app.config["DB_HOST"], cursorclass=pymysql.cursors.DictCursor)
         self.cursor = g.db.cursor()
+        if not hasattr(g, 'redis'):
+            g.redis = redis.Redis(host=self.app.config["REDIS_HOST"], port=self.app.config["REDIS_PORT"], db=self.app.config["REDIS_DB"])
     
     @property
     def wsuuid(self):
