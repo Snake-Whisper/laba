@@ -31,6 +31,7 @@ class ChatNamespace(Namespace):
             join_room(str(chat))
 
     def on_disconnect(self):
+        #TODO: fix runtime error if direct kick
         session["user"].recover()
         del session["user"].wsuuid
         session["chat"].recover()
@@ -72,7 +73,9 @@ class ChatNamespace(Namespace):
         id = session["chat"].makeChat(msg)
         packet = {
             "name" : msg,
-            "id" : id
+            "id" : id,
+            "icon" : None,
+            "descript" : None
         }
         print(packet)
         emit("addChat", packet)
@@ -106,3 +109,44 @@ class ChatNamespace(Namespace):
 			"chatId" : session["chat"].chat,
 		 }
         self.call(msg, "addChatEntryBot", package)
+    
+    def on_addAdmin(self, msg):
+        session["chat"].recover()
+        session["user"].recover()
+        try:
+            session["chat"].addAdmin(msg)
+        except NotAdmin:
+            emit("error", "You're not an Admin for this Chat")
+            return
+        except pymysql.IntegrityError:
+            emit ("error", "User {0} is already member".format(msg))
+            return
+        except NotInChat:
+            emit ("error", "User {0} is not a chat member".format(msg))
+        package = {
+            "id" : session["chat"].chat
+        }
+        self.call(msg, "mkAdmin", package)
+        package = {"ctime" : strftime("%d %b, %H:%M"), 
+			"content" : "{0} made you an admin".format(session["user"].username),
+			"chatId" : session["chat"].chat,
+		 }
+        self.call(msg, "addChatEntryBot", package)
+    def on_listMembers(self):
+        #do autom. on setChat!
+        pass
+    def on_delMember(self, msg):
+        pass
+    def on_delAdmin(self, msg):
+        pass
+    def on_exitChat(self, msg):
+        pass
+    def on_delPost(self, msg):
+        pass
+    #def on_setChatIcon(self, msg):
+    #    xhr?
+    #    pass
+    def on_setChatDescript(self, msg):
+        pass
+    def on_setChatName(self, msg):
+        pass

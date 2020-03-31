@@ -12,7 +12,7 @@ socket.on('disconnect', function() {
 socket.on("loadChatList", function(msg) {
     console.log(msg);
     msg.forEach(chat => {
-        dummy_addChat(chat.name, chat.id);
+        dummy_addChat(chat.name, chat.id, chat.icon, chat.descript);
     });
 });
 
@@ -38,15 +38,25 @@ socket.on("recvFile", function (msg) {
 
 socket.on('addChat', function (msg) {
     console.log(msg);
-    dummy_addChat(msg.name, msg.id)
+    dummy_addChat(msg.name, msg.id, msg.icon, msg.descript)
 })
 
 socket.on("addChatEntryBot", function (msg) {
     dummy_botEntry(msg.chatId, msg.content, msg.ctime);
 })
-//socket.on('mkAdmin')
+
+socket.on('mkAdmin', function (msg) {
+    dummy_mkAdmin(msg.id);
+})
+
+socket.on('listMembers', function (msg) {
+    msg.forEach( entry => {
+        dummy_addMemberOrAdmin(entry.username, entry.admin)
+    })
+})
 //socket.on('delAdmin')
 //socket.on('delChat')
+
 
 
 
@@ -75,7 +85,16 @@ function addMember(username) {
     socket.emit("addMember", username);
 }
 
-function dummy_addChat(name, id) {
+function addAdmin(username) {
+    socket.emit("addAdmin", username)
+}
+
+
+function dummy_mkAdmin(chatid) {
+    console.log("Hey, I'm now a chat Admin for chatid: " + chatid);
+}
+
+function dummy_addChat(name, id, icon, descript) {
     console.log("adding chat: " + name + " with id: " + id);
 }
 
@@ -85,17 +104,21 @@ function dummy_disconnect() {
 
 function dummy_loadChatEntry(content, ctime, author) {
     //INSERT after FIRST_NODE!!! Entries reverse sorted.
-
+    
     // < NEW message > <--------
     // <old message 3>
     // <old message 2>
     // <old message 1>
     // <old message 0>
     console.log("adding chatEntry: " + content
-                + " from: " + ctime
-                + " by " + author);
+    + " from: " + ctime
+    + " by " + author);
 }
 
+function dummy_addMemberOrAdmin(username, admin) {
+    //TODO: filter self -> admin/dau?
+    console.log("Add " + admin ? "admin: " : "user: " + username)
+}
 function dummy_recvPost(chatId, content, ctime, author) {
     //INSERT before LAST_NODE.
     //Messages given to this function are following the flow of time.

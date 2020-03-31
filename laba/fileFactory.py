@@ -11,7 +11,7 @@ import errno
 
 class FileFactory():
     def __init__(self, app):
-        assert hasattr(g, "user") and g.user.health, "Something very nesty is going on. When in Productiomode take Laba-Server immediately down and contact dev!"
+        #assert user.health, "Something very nesty is going on. When in Productiomode take Laba-Server immediately down and contact dev!"
         self.app = app
         if not hasattr(g, 'db'):
             g.db = pymysql.connect(user=app.config["DB_USER"], db=app.config["DB_DB"], password=app.config["DB_PWD"], host=app.config["DB_HOST"], cursorclass=pymysql.cursors.DictCursor)

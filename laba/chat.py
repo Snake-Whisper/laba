@@ -33,7 +33,8 @@ class Chat():
         return [i["chatid"] for i in self.query("SELECT chatid FROM chatMembers WHERE userid=%s", self.user.id)]
     
     def getChats(self):
-        return self.query("SELECT id, name FROM chats, chatMembers WHERE userid=%s AND chats.id=chatMembers.chatid", self.user.id)
+        return self.query("SELECT id, name, descript, get_file(icon, %s, %s) AS icon FROM chats, chatMembers WHERE userid=%s AND chats.id=chatMembers.chatid",
+                        (self.app.config["DATADIR"], self.app.config["FILEDIR_DEEP"], self.user.id))
     
     def __contains__(self, chatId):
         if chatId in self.__chats:
@@ -111,6 +112,14 @@ class Chat():
         #data = [(x, self.__currentChat) for x in memberlist]
         #TODO: catch error at duplicates
         sql = "INSERT INTO chatMembers (userid, chatid, actor) VALUES ((SELECT id FROM users WHERE username=%s), %s, %s)"
+        self.cursor.execute(sql, (member, self.__currentChat, self.user.id))
+    
+    def addAdmin(self, member):
+        if not self.isAdmin():
+            raise NotAdmin
+        if not self.queryOne("SELECT userid from chatMembers, users WHERE chatMembers.userid=users.id AND users.username=%s", member):
+            raise NotInChat
+        sql = "INSERT INTO chatAdmins (userid, chatid, actor) VALUES ((SELECT id FROM users WHERE username=%s), %s, %s)"
         self.cursor.execute(sql, (member, self.__currentChat, self.user.id))
     
     #def delMembers(self, memberlist):
