@@ -61,6 +61,10 @@ class User():
     @wsuuid.setter
     def wsuuid(self, wsuuid):
         g.redis.set(self._values["username"], wsuuid, self.app.config["AUTO_LOGOUT"])
+    
+    @wsuuid.deleter
+    def wsuuid(self):
+        g.redis.delete(self._values["username"])
 
     @property
     def id(self):

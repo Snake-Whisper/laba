@@ -32,6 +32,7 @@ class ChatNamespace(Namespace):
 
     def on_disconnect(self):
         session["user"].recover()
+        del session["user"].wsuuid
         session["chat"].recover()
         session.pop("user")
         session.pop("chat")
