@@ -105,10 +105,12 @@ class ChatNamespace(Namespace):
         }
         self.call(msg, "addChat", package)
         package = {"ctime" : strftime("%d %b, %H:%M"), 
-			"content" : "{0} added you".format(session["user"].username),
-			"chatId" : session["chat"].chat,
+			"content" : "{0} added {1}".format(session["user"].username, msg),
+			"chatId" : session["chat"].chat
 		 }
-        self.call(msg, "addChatEntryBot", package)
+        #self.call(msg, "addChatEntryBot", package)
+        session["chat"].makeChatBotEntry("{0} added {1}".format(session["user"].username, msg))
+        emit("addChatEntryBot", package, room=str(session["chat"].chat))
     
     def on_addAdmin(self, msg):
         session["chat"].recover()
@@ -128,13 +130,23 @@ class ChatNamespace(Namespace):
         }
         self.call(msg, "mkAdmin", package)
         package = {"ctime" : strftime("%d %b, %H:%M"), 
-			"content" : "{0} made you an admin".format(session["user"].username),
-			"chatId" : session["chat"].chat,
+			"content" : "{0} made {1} an admin".format(session["user"].username, msg),
+			"chatId" : session["chat"].chat
 		 }
-        self.call(msg, "addChatEntryBot", package)
+        session["chat"].makeChatBotEntry("{0} made {1} an Admin".format(session["user"].username, msg))
+        #self.call(msg, "addChatEntryBot", package)
+        emit("addChatEntryBot", package, room=str(session["chat"].chat))
+
     def on_listMembers(self):
-        #do autom. on setChat!
-        pass
+        session["chat"].recover()
+        if session["chat"].chat == -1:
+            emit("error", "no chat set.")
+            return
+        package = {
+            "members" : session["chat"].getMembers(),
+            "admins" : session["chat"].getAdmins()
+        }
+        emit("listMembers", package)
     def on_delMember(self, msg):
         pass
     def on_delAdmin(self, msg):

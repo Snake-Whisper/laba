@@ -72,6 +72,11 @@ class Chat():
         sql = """INSERT INTO chatEntries (author, chatID, content) VALUES(%s, %s, %s)"""
         self.cursor.execute(sql, (self.user.id, self.__currentChat, content))
         g.db.commit()
+    
+    def makeChatBotEntry(self, content):
+        sql = """INSERT INTO chatEntries (author, chatID, content) VALUES(1, %s, %s)"""
+        self.cursor.execute(sql, (self.__currentChat, content))
+        g.db.commit()
 
     def makeChatFileEntry(self, content, fileid):
         sql = """INSERT INTO chatEntries (author, chatID, content, file) VALUES(%s, %s, %s, %s)"""
@@ -94,8 +99,12 @@ class Chat():
         sql = "SELECT userid FROM chatAdmins WHERE userid=%s AND chatid=%s"
         return bool(self.queryOne(sql, (self.user.id, self.__currentChat)))
     
-    def getMemebers(self):
+    def getMembers(self):
         sql = """SELECT users.username FROM users, chatMembers WHERE chatid = %s AND users.id = chatMembers.userid"""
+        return [i['username'] for i in self.query(sql, (self.__currentChat))]
+    
+    def getAdmins(self):
+        sql = """SELECT users.username FROM users, chatAdmins WHERE chatid = %s AND users.id = chatAdmins.userid"""
         return [i['username'] for i in self.query(sql, (self.__currentChat))]
     
     def addMembers(self, memberlist):

@@ -50,8 +50,9 @@ socket.on('mkAdmin', function (msg) {
 })
 
 socket.on('listMembers', function (msg) {
-    msg.forEach( entry => {
-        dummy_addMemberOrAdmin(entry.username, entry.admin)
+    console.log(msg);
+    msg.members.forEach( entry => {
+        dummy_addMemberOrAdmin(entry, msg.admins.includes(entry));
     })
 })
 //socket.on('delAdmin')
@@ -86,7 +87,11 @@ function addMember(username) {
 }
 
 function addAdmin(username) {
-    socket.emit("addAdmin", username)
+    socket.emit("addAdmin", username);
+}
+
+function listMembers() {
+    socket.emit("listMembers");
 }
 
 
@@ -117,7 +122,7 @@ function dummy_loadChatEntry(content, ctime, author) {
 
 function dummy_addMemberOrAdmin(username, admin) {
     //TODO: filter self -> admin/dau?
-    console.log("Add " + admin ? "admin: " : "user: " + username)
+    console.log("Add " + (admin ? "admin: " : "user: ") + username)
 }
 function dummy_recvPost(chatId, content, ctime, author) {
     //INSERT before LAST_NODE.
