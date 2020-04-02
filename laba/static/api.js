@@ -30,36 +30,50 @@ socket.on("loadChatEntries", function(msg) {
 
 socket.on("recvPost", function (msg) {
     dummy_recvPost(msg.chatId, msg.content, msg.ctime, msg.username);
-})
+});
 
 socket.on("recvFile", function (msg) {
     dummy_recvFile(msg.chatId, msg.content, msg.ctime, msg.username, msg.filename)
-})
+});
 
 socket.on('addChat', function (msg) {
     console.log(msg);
     dummy_addChat(msg.name, msg.id, msg.icon, msg.descript)
-})
+});
 
 socket.on("addChatEntryBot", function (msg) {
     dummy_botEntry(msg.chatId, msg.content, msg.ctime);
-})
+});
 
 socket.on('mkAdmin', function (msg) {
     dummy_mkAdmin(msg.id);
-})
+});
 
 socket.on('listMembers', function (msg) {
     console.log(msg);
     msg.members.forEach( entry => {
         dummy_addMemberOrAdmin(entry, msg.admins.includes(entry));
     })
-})
-//socket.on('delAdmin')
-//socket.on('delChat')
+});
+socket.on('delChat', function(msg) {
+    console.log(msg);
+    dummy_delChat(msg.id);
+});
 
+socket.on('delAdmin', function (msg) {
+    console.log(msg)
+    dummy_delAdmin(msg.id);
+});
 
+socket.on("setChatDescription", function (msg) {
+    console.log(msg);
+    dummy_setChatDescription(msg.chatId, msg.ctime, msg.description);
+});
 
+socket.on("setChatName", function (msg) {
+    console.log(msg);
+    dummy_setChatName(msg.chatId, msg.ctime, msg.name);
+});
 
 socket.on("error", function(msg) {
     console.error(msg);
@@ -86,21 +100,44 @@ function addMember(username) {
     socket.emit("addMember", username);
 }
 
+function delMember(username) {
+    socket.emit("delMember", username);
+}
+
 function addAdmin(username) {
     socket.emit("addAdmin", username);
+}
+
+function delAdmin(username) {
+    socket.emit("delAdmin", username)
 }
 
 function listMembers() {
     socket.emit("listMembers");
 }
 
+function setChatDescription (description) {
+    socket.emit("setChatDescript", description);
+}
+
+function setChatName (name) {
+    socket.emit("setChatName", name);
+}
 
 function dummy_mkAdmin(chatid) {
     console.log("Hey, I'm now a chat Admin for chatid: " + chatid);
 }
 
+function dummy_delAdmin(chatid) {
+    console.log("oh, I'm not any more an Admin of Chat " + chatid);
+}
+
 function dummy_addChat(name, id, icon, descript) {
     console.log("adding chat: " + name + " with id: " + id);
+}
+
+function dummy_delChat(id) {
+    console.log("Deleting chat" + id);
 }
 
 function dummy_disconnect() {
@@ -157,4 +194,12 @@ function dummy_loadChatEntryFile(content, ctime, author, name, url) {
 
 function dummy_botEntry(chatId, content, ctime) {
     console.log("Botentry for chat " + chatId + ": " + content);
+}
+
+function dummy_setChatDescription(chatid, ctime, description) {
+    console.log("Change Chat Description for Chat " + chatid + " to " + description);
+}
+
+function dummy_setChatName(chatId, ctime, name) {
+    console.log("Change Chat Name for Chat " + chatid + " to " + name);
 }

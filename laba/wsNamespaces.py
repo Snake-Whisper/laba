@@ -7,6 +7,7 @@ from exceptions.chatExceptions import *
 from time import strftime
 from json import loads, dumps
 import pymysql
+from redis import Redis
 
 class ChatNamespace(Namespace):
     def __init__(self, namespace, app):
@@ -82,7 +83,7 @@ class ChatNamespace(Namespace):
     
     def call(self, username, event, msg):
         if not hasattr(g, 'redis'):
-            g.redis = redis.Redis(host=app.config["REDIS_HOST"], port=app.config["REDIS_PORT"], db=app.config["REDIS_DB"])
+            g.redis = Redis(host=app.config["REDIS_HOST"], port=app.config["REDIS_PORT"], db=app.config["REDIS_DB"])
         sid = g.redis.get(username).decode()
         if not sid:
             return
@@ -104,6 +105,7 @@ class ChatNamespace(Namespace):
             "name" : session["chat"].name
         }
         self.call(msg, "addChat", package)
+        join_room(session["chat"].id, g.redis.get[msg])
         package = {"ctime" : strftime("%d %b, %H:%M"), 
 			"content" : "{0} added {1}".format(session["user"].username, msg),
 			"chatId" : session["chat"].chat
@@ -147,18 +149,123 @@ class ChatNamespace(Namespace):
             "admins" : session["chat"].getAdmins()
         }
         emit("listMembers", package)
+
     def on_delMember(self, msg):
-        pass
+        session["chat"].recover()
+        session["user"].recover()
+        if session["chat"].chat == -1:
+            emit("error", "no chat set.")
+            return
+        try:
+            session["chat"].delMember(msg)
+        except NotAdmin:
+            emit("error", "You're not an Admin for this Chat")
+            return
+        except NotInChat:
+            emit("error", "Not a chat member")
+            return
+        package = {
+            "id" : session["chat"].chat,
+        }
+        self.call(msg, "delChat", package)
+        package = {"ctime" : strftime("%d %b, %H:%M"), 
+			"content" : "{0} deleted {1}".format(session["user"].username, msg),
+			"chatId" : session["chat"].chat
+		 }
+        session["chat"].makeChatBotEntry("{0} deleted {1}".format(session["user"].username, msg))
+        emit("addChatEntryBot", package, room=str(session["chat"].chat))
+
     def on_delAdmin(self, msg):
-        pass
-    def on_exitChat(self, msg):
-        pass
+        session["chat"].recover()
+        session["user"].recover()
+        if session["chat"].chat == -1:
+            emit("error", "no chat set.")
+            return
+        try:
+            session["chat"].delAdmin(msg)
+        except NotAdmin:
+            emit("error", "You're not an Admin for this Chat")
+            return
+        except NotInChat:
+            emit("error", "Not a chat member or already droped privilegs")
+            return
+        package = {
+            "id" : session["chat"].chat,
+        }
+        self.call(msg, "delAdmin", package)
+        package = {"ctime" : strftime("%d %b, %H:%M"), 
+			"content" : "{0} removed admin privilegs from {1}".format(session["user"].username, msg),
+			"chatId" : session["chat"].chat
+		 }
+        session["chat"].makeChatBotEntry("{0} removed admin privilegs from {1}".format(session["user"].username, msg))
+        emit("addChatEntryBot", package, room=str(session["chat"].chat))
+
+    def on_exitChat(self):
+        session["chat"].recover()
+        session["user"].recover()
+        if session["chat"].chat == -1:
+            emit("error", "no chat set.")
+            return
+        session["chat"].exitChat()
+        package = {
+            "id" : session["chat"].chat,
+        }
+        self.call(session["chat"].chat, "delChat", package)
+        leave_room(session["chat"].chat)
+        package = {"ctime" : strftime("%d %b, %H:%M"), 
+			"content" : "{0} left {1}".format(session["user"].username, session["chat"].chat),
+			"chatId" : session["chat"].chat
+		}
+        session["chat"].makeChatBotEntry("{0} left {1}".format(session["user"].username, msg))
+        emit("addChatEntryBot", package, room=str(session["chat"].chat))
+
+    def on_setChatDescript(self, msg):
+        session["user"].recover()
+        session["chat"].recover()
+        try:
+            session["chat"].description = msg
+        except NotAdmin:
+            emit("error", "You are not an Admin of this chat")
+            return
+        session["chat"].commit2db()
+        package = {
+            "ctime" : strftime("%d %b, %H:%M"),
+            "chatId" : session["chat"].chat,
+            "description" : session["chat"].description
+        }
+        emit("setChatDescription", package, room=str(session["chat"].chat))
+        session["chat"].addChatEntryBot("{0} change Chatdescription".format(session["user"].username))
+        package = {"ctime" : strftime("%d %b, %H:%M"), 
+			"content" : "{0} changed Description of {1}".format(session["user"].username, session["chat"].name),
+			"chatId" : session["chat"].chat
+		}
+        emit("addChatEntryBot", package, room=str(session["chat"].chat))
+
+    def on_setChatName(self, msg):
+        session["user"].recover()
+        session["chat"].recover()
+        try:
+            session["chat"].name = msg
+        except NotAdmin:
+            emit("error", "You are not an Admin of this chat")
+            return
+        session["chat"].commit2db()
+        package = {
+            "ctime" : strftime("%d %b, %H:%M"),
+            "chatId" : session["chat"].chat,
+            "name" : session["chat"].name
+        }
+        emit("setChatName", package, room=str(session["chat"].chat))
+        session["chat"].addChatEntryBot("{0} change Chat Name".format(session["user"].username))
+        package = {"ctime" : strftime("%d %b, %H:%M"), 
+			"content" : "{0} changed Name of {1}".format(session["user"].username, session["chat"].name),
+			"chatId" : session["chat"].chat
+		}
+        emit("addChatEntryBot", package, room=str(session["chat"].chat))
+
     def on_delPost(self, msg):
         pass
+    
     #def on_setChatIcon(self, msg):
     #    xhr?
     #    pass
-    def on_setChatDescript(self, msg):
-        pass
-    def on_setChatName(self, msg):
-        pass

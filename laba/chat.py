@@ -127,17 +127,31 @@ class Chat():
         if not self.isAdmin():
             raise NotAdmin
         if not self.queryOne("SELECT userid from chatMembers, users WHERE chatMembers.userid=users.id AND users.username=%s", member):
-            raise NotInChat
+            raise NotInChat(member, self.chat)
         sql = "INSERT INTO chatAdmins (userid, chatid, actor) VALUES ((SELECT id FROM users WHERE username=%s), %s, %s)"
         self.cursor.execute(sql, (member, self.__currentChat, self.user.id))
     
-    #def delMembers(self, memberlist):
-    #    if not self.isAdmin():
-    #        raise NotAdmin
-        #data = [(x, self.__currentChat) for x in memberlist]
-        #TODO: check against duplicates
-        #sql = "INSERT INTO chatAdmin (userid, chatid) VALUES ((SELECT id FROM users WHERE username=%s)), %s)"
-        #self.cursor.executemany(sql, data)
+    def delMember(self, member):
+        if not self.isAdmin():
+            raise NotAdmin
+        sql = "DELETE FROM chatMembers WHERE chatid=%s AND userid= (SELECT id FROM users WHERE username=%s)"
+        affenRows = self.cursor.execute(sql, (self.__currentChat, member))
+        if not affenRows:
+            raise NotInChat(member, self.chat)
+    
+    def delAdmin(self, member):
+        if not self.isAdmin():
+            raise NotAdmin
+        sql = "DELETE FROM chatAdmins WHERE chatid=%s AND userid= (SELECT id FROM users WHERE username=%s)"
+        affenRows = self.cursor.execute(sql, (self.__currentChat, member))
+        if not affenRows:
+            raise NotInChat(member, self.chat)
+
+    def exitCache(self):
+        sql = "DELETE FROM chatAdmins WHERE chatid=%s AND userid= (SELECT id FROM users WHERE username=%s)"
+        self.cursor.execute(sql, (self.__currentChat, self.user.id))
+        sql = "DELETE FROM chatMembers WHERE chatid=%s AND userid= (SELECT id FROM users WHERE username=%s)"
+        self.cursor.execute(sql, (self.__currentChat, self.user.id))
 
 
     #@property
@@ -171,6 +185,8 @@ class Chat():
         return self.__values["name"]
     @name.setter
     def name(self, value):
+        if not self.isAdmin():
+            raise NotAdmin
         if self.__values["name"] != value:
             self.__values["name"] = value
             self.__changed["name"] = value
@@ -186,9 +202,11 @@ class Chat():
         return self.__values["descript"]
     @description.setter
     def description(self, value):
+        if not self.isAdmin():
+            raise NotAdmin
         if self.__values["descrip"] != value:
             self.__values["descrip"] = value
-            self.__changes["descrip"] = value
+            self.__changed["descrip"] = value
     
     def commit2db(self):
         if self.__changed:
