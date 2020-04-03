@@ -1,0 +1,24 @@
+#read a bit from urandom
+SECRET_KEY = 'changeMe'
+AUTO_LOGOUT = 60*20
+TOKEN_TIMEOUT = 60
+MAX_CONTENT_LENGTH = 30 * 1024 * 1024
+DATADIR = "static/files/"
+
+DB_USER = "dbusername"
+DB_DB = "databasename"
+DB_PWD = "databases Password"
+DB_HOST = "databses ip addr"
+
+REDIS_HOST = "Redis IP addr"
+REDIS_DB = 0
+REDIS_PORT = 6379
+
+#unstable: Security option for file lenght
+SALT_LENGHT = 10
+
+#performance option to help ext4 with large sets of files
+FILEDIR_DEEP = 3
+
+#number of chatentries loaded per chunk
+CHAT_BLOCK_ROWS = 5

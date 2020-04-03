@@ -10,27 +10,9 @@ from json import loads, dumps
 from flask_socketio import SocketIO
 from wsNamespaces import *
 
-
 app = Flask(__name__)
 
-app.config.update(
-    SECRET_KEY = '\x81H\xb8\xa3S\xf8\x8b\xbd"o\xca\xd7\x08\xa4op\x07\xb5\xde\x87\xb8\xcc\xe8\x86\\\xffS\xea8\x86"\x97',
-	REDIS_URL = "redis://localhost:6379/0",
-	AUTO_LOGOUT = 60*20,
-	TOKEN_TIMEOUT = 60,
-	MAX_CONTENT_LENGTH = 30 * 1024 * 1024,
-	DATADIR = "static/files/",
-	DB_USER = "laba",
-	DB_DB = "laba",
-	DB_PWD = "brUQJD1sAYeQaeuJ",
-	DB_HOST = "localhost",
-	REDIS_HOST = "localhost",
-	REDIS_DB = 0,
-	REDIS_PORT = 6379,
-	SALT_LENGHT = 10,
-	FILEDIR_DEEP = 3,
-	CHAT_BLOCK_ROWS = 5
-)
+app.config.from_pyfile("config")
 
 socketio = SocketIO(app)
 socketio.on_namespace(ChatNamespace("/chat", app))
