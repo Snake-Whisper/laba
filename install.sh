@@ -12,4 +12,4 @@ pip3 install wheel
 pip3 install --editable .
 cd laba
 flask initDB
-#deactivate
+deactivate
