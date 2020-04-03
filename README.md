@@ -6,8 +6,8 @@ This server implements a simple chat server app written in python/flask.
 Installation:
 -------------
 ```bash
-#please config laba/app.py
-nano laba/app.py
+#please config laba/config
+nano laba/config
 
 #run installer
 ./install.sh
