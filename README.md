@@ -9,8 +9,8 @@ Installation:
 apt-get update
 apt-get install -y --no-install-recommends python3-pip python3-venv git
 git clone https://github.com/Snake-Whisper/laba
-git checkout build-package
 cd laba
+git checkout build-package
 python3 -m venv venv
 . venv/bin/activate
 pip3 install wheel
