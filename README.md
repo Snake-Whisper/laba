@@ -14,7 +14,7 @@ git checkout package-build
 python3 -m venv venv
 . venv/bin/activate
 pip3 install wheel
-pip3 install -editable .
+pip3 install --editable .
 deactivate
 ```
 Start Server
