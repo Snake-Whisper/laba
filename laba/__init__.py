@@ -1,1 +1,0 @@
-from .laba import app
