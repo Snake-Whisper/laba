@@ -10,7 +10,7 @@ apt install python3-pip python3-venv
 git clone https://github.com/Snake-Whisper/laba
 cd laba
 python3 -m venv venv
-. source venv/bin/activate
+. venv/bin/activate
 pip3 install wheel
 pip3 install -editable
 deactivate
@@ -18,6 +18,6 @@ deactivate
 Start Server
 ------------
 ```bash
-python3 venv/bin/activate
+. venv/bin/activate
 python3 laba/app.py
 ```
