@@ -60,11 +60,12 @@ class ChatNamespace(Namespace):
         if session["chat"].chat == -1:
             emit("error", "no chat set.")
             return
-        session["chat"].makeChatTextEntry(msg)
+        id = session["chat"].makeChatTextEntry(msg)
         packet = {"ctime" : strftime("%d %b, %H:%M"), 
 				   "content" : msg,
 				   "username" : session["user"].username,
 				   "chatId" : session["chat"].chat,
+                   "entryid" : id
 				  }
         print(packet)
         emit("recvPost", packet, room=str(session["chat"].chat))
@@ -78,6 +79,7 @@ class ChatNamespace(Namespace):
             "icon" : None,
             "descript" : None
         }
+        join_room(str(id))
         print(packet)
         emit("addChat", packet)
     
@@ -105,7 +107,8 @@ class ChatNamespace(Namespace):
             "name" : session["chat"].name
         }
         self.call(msg, "addChat", package)
-        join_room(session["chat"].id, g.redis.get[msg])
+        print(g.redis.get(msg))
+        join_room(str(session["chat"].chat), sid=g.redis.get(msg).decode())
         package = {"ctime" : strftime("%d %b, %H:%M"), 
 			"content" : "{0} added {1}".format(session["user"].username, msg),
 			"chatId" : session["chat"].chat
@@ -171,7 +174,7 @@ class ChatNamespace(Namespace):
         package = {"ctime" : strftime("%d %b, %H:%M"), 
 			"content" : "{0} deleted {1}".format(session["user"].username, msg),
 			"chatId" : session["chat"].chat
-		 }
+		}
         session["chat"].makeChatBotEntry("{0} deleted {1}".format(session["user"].username, msg))
         emit("addChatEntryBot", package, room=str(session["chat"].chat))
 
@@ -206,18 +209,18 @@ class ChatNamespace(Namespace):
         if session["chat"].chat == -1:
             emit("error", "no chat set.")
             return
-        session["chat"].exitChat()
         package = {
             "id" : session["chat"].chat,
         }
-        self.call(session["chat"].chat, "delChat", package)
-        leave_room(session["chat"].chat)
+        self.call(session["user"].username, "delChat", package)
+        leave_room(str(session["chat"].chat))
         package = {"ctime" : strftime("%d %b, %H:%M"), 
 			"content" : "{0} left {1}".format(session["user"].username, session["chat"].chat),
 			"chatId" : session["chat"].chat
 		}
-        session["chat"].makeChatBotEntry("{0} left {1}".format(session["user"].username, msg))
+        session["chat"].makeChatBotEntry("{0} left {1}".format(session["user"].username, session["chat"].chat))
         emit("addChatEntryBot", package, room=str(session["chat"].chat))
+        session["chat"].exitChat()
 
     def on_setChatDescript(self, msg):
         session["user"].recover()
@@ -234,7 +237,7 @@ class ChatNamespace(Namespace):
             "description" : session["chat"].description
         }
         emit("setChatDescription", package, room=str(session["chat"].chat))
-        session["chat"].addChatEntryBot("{0} change Chatdescription".format(session["user"].username))
+        session["chat"].makeChatBotEntry("{0} change Chatdescription".format(session["user"].username))
         package = {"ctime" : strftime("%d %b, %H:%M"), 
 			"content" : "{0} changed Description of {1}".format(session["user"].username, session["chat"].name),
 			"chatId" : session["chat"].chat
@@ -256,7 +259,7 @@ class ChatNamespace(Namespace):
             "name" : session["chat"].name
         }
         emit("setChatName", package, room=str(session["chat"].chat))
-        session["chat"].addChatEntryBot("{0} change Chat Name".format(session["user"].username))
+        session["chat"].makeChatBotEntry("{0} change Chat Name".format(session["user"].username))
         package = {"ctime" : strftime("%d %b, %H:%M"), 
 			"content" : "{0} changed Name of {1}".format(session["user"].username, session["chat"].name),
 			"chatId" : session["chat"].chat

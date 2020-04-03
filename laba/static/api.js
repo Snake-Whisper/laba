@@ -20,20 +20,20 @@ socket.on("loadChatEntries", function(msg) {
     console.log(msg);
     msg.chatEntries.forEach(entry => {
         if (entry.file == null) {
-            dummy_loadChatEntry(entry.content, entry.ctime, entry.username);
+            dummy_loadChatEntry(entry.content, entry.entryid, entry.ctime, entry.username);
         } else {
             file = msg.files.pop();
-            dummy_loadChatEntryFile(entry.content, entry.ctime, entry.username, file.name, file.url);
+            dummy_loadChatEntryFile(entry.content, entry.entryid, entry.ctime, entry.username, file.name, file.url);
         }
     });
 });
 
 socket.on("recvPost", function (msg) {
-    dummy_recvPost(msg.chatId, msg.content, msg.ctime, msg.username);
+    dummy_recvPost(msg.chatId, msg.entryid, msg.content, msg.ctime, msg.username);
 });
 
 socket.on("recvFile", function (msg) {
-    dummy_recvFile(msg.chatId, msg.content, msg.ctime, msg.username, msg.filename)
+    dummy_recvFile(msg.chatId, msg.entryid, msg.content, msg.ctime, msg.username, msg.filename)
 });
 
 socket.on('addChat', function (msg) {
@@ -116,6 +116,10 @@ function listMembers() {
     socket.emit("listMembers");
 }
 
+function exitChat() {
+    socket.emit("exitChat");
+}
+
 function setChatDescription (description) {
     socket.emit("setChatDescript", description);
 }
@@ -133,7 +137,7 @@ function dummy_delAdmin(chatid) {
 }
 
 function dummy_addChat(name, id, icon, descript) {
-    console.log("adding chat: " + name + " with id: " + id);
+    console.log("adding chat: " + name + " with id: " + id + " , icon: " + icon + " , description: " + descript);
 }
 
 function dummy_delChat(id) {
@@ -144,7 +148,7 @@ function dummy_disconnect() {
     console.log("Please login.");
 }
 
-function dummy_loadChatEntry(content, ctime, author) {
+function dummy_loadChatEntry(content, entryid, ctime, author) {
     //INSERT after FIRST_NODE!!! Entries reverse sorted.
     
     // < NEW message > <--------
@@ -152,16 +156,25 @@ function dummy_loadChatEntry(content, ctime, author) {
     // <old message 2>
     // <old message 1>
     // <old message 0>
-    console.log("adding chatEntry: " + content
+    console.log("adding chatEntry: " + entryid + ") " + content
     + " from: " + ctime
     + " by " + author);
+}
+
+function dummy_loadChatEntryFile(content, entryid, ctime, author, name, url) {
+    //INSERT after FIRST_NODE!!! Entrys reverse sorted.
+    console.log("adding chatEntryFile: " + entryid + ") " + name
+                + " from: " + ctime
+                + " by " + author
+                + " comment: " + content
+                + " url: " + url);
 }
 
 function dummy_addMemberOrAdmin(username, admin) {
     //TODO: filter self -> admin/dau?
     console.log("Add " + (admin ? "admin: " : "user: ") + username)
 }
-function dummy_recvPost(chatId, content, ctime, author) {
+function dummy_recvPost(chatId, entryid, content, ctime, author) {
     //INSERT before LAST_NODE.
     //Messages given to this function are following the flow of time.
     // <old message 3>
@@ -169,10 +182,10 @@ function dummy_recvPost(chatId, content, ctime, author) {
     // <old message 1>
     // <old message 0>
     // < NEW message > <--------
-    console.log("New Message for Chat " + chatId + ": " + content + " (" + author + ", " + ctime + ")");
+    console.log("New Message for Chat " + chatId + ": " + entryid + ") " + content + " (" + author + ", " + ctime + ")");
 }
 
-function dummy_recvFile(chatId, content, ctime, author, url, filename) {
+function dummy_recvFile(chatId, entryid, content, ctime, author, url, filename) {
     //INSERT before LAST_NODE.
     //Messages given to this function are following the flow of time.
     // <old message 3>
@@ -180,17 +193,9 @@ function dummy_recvFile(chatId, content, ctime, author, url, filename) {
     // <old message 1>
     // <old message 0>
     // < NEW message > <--------
-    console.log("New File for Chat " + chatId + ": " + filename + " (" + author + ", " + ctime + ")");
+    console.log("New File for Chat " + chatId + ": " + entryid + ") " + filename + " (" + author + ", " + ctime + ")");
 }
 
-function dummy_loadChatEntryFile(content, ctime, author, name, url) {
-    //INSERT after FIRST_NODE!!! Entrys reverse sorted.
-    console.log("adding chatEntryFile: " + name
-                + " from: " + ctime
-                + " by " + author
-                + " comment: " + content
-                + " url: " + url);
-}
 
 function dummy_botEntry(chatId, content, ctime) {
     console.log("Botentry for chat " + chatId + ": " + content);
@@ -200,6 +205,6 @@ function dummy_setChatDescription(chatid, ctime, description) {
     console.log("Change Chat Description for Chat " + chatid + " to " + description);
 }
 
-function dummy_setChatName(chatId, ctime, name) {
+function dummy_setChatName(chatid, ctime, name) {
     console.log("Change Chat Name for Chat " + chatid + " to " + name);
 }

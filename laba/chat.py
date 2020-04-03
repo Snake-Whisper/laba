@@ -48,7 +48,7 @@ class Chat():
 
         res = {}
 
-        sql = """SELECT username, DATE_FORMAT(chatEntries.ctime, '%%e %%b, %%H:%%i') AS ctime, content, file
+        sql = """SELECT username, DATE_FORMAT(chatEntries.ctime, '%%e %%b, %%H:%%i') AS ctime, content, file, chatEntries.id AS entryid
         FROM users, chatEntries
         WHERE
         chatEntries.chatID = %s AND
@@ -72,6 +72,7 @@ class Chat():
         sql = """INSERT INTO chatEntries (author, chatID, content) VALUES(%s, %s, %s)"""
         self.cursor.execute(sql, (self.user.id, self.__currentChat, content))
         g.db.commit()
+        return self.cursor.lastrowid
     
     def makeChatBotEntry(self, content):
         sql = """INSERT INTO chatEntries (author, chatID, content) VALUES(1, %s, %s)"""
@@ -82,6 +83,7 @@ class Chat():
         sql = """INSERT INTO chatEntries (author, chatID, content, file) VALUES(%s, %s, %s, %s)"""
         self.cursor.execute(sql, (self.user.id, self.__currentChat, content, fileid))
         g.db.commit()
+        return self.cursor.lastrowid
     
     def makeChat(self, chatname):
         if len(chatname) > 50:
@@ -117,6 +119,7 @@ class Chat():
     
     def addMember(self, member):
         if not self.isAdmin():
+            print(self.user.username + "is not an Admin")
             raise NotAdmin
         #data = [(x, self.__currentChat) for x in memberlist]
         #TODO: catch error at duplicates
@@ -147,11 +150,13 @@ class Chat():
         if not affenRows:
             raise NotInChat(member, self.chat)
 
-    def exitCache(self):
-        sql = "DELETE FROM chatAdmins WHERE chatid=%s AND userid= (SELECT id FROM users WHERE username=%s)"
+    def exitChat(self):
+        sql = "DELETE FROM chatAdmins WHERE chatid=%s AND userid=%s"
         self.cursor.execute(sql, (self.__currentChat, self.user.id))
-        sql = "DELETE FROM chatMembers WHERE chatid=%s AND userid= (SELECT id FROM users WHERE username=%s)"
+        sql = "DELETE FROM chatMembers WHERE chatid=%s AND userid=%s"
         self.cursor.execute(sql, (self.__currentChat, self.user.id))
+        self.__chats.remove(self.__currentChat)
+        self.__currentChat = -1
 
 
     #@property
@@ -204,9 +209,9 @@ class Chat():
     def description(self, value):
         if not self.isAdmin():
             raise NotAdmin
-        if self.__values["descrip"] != value:
-            self.__values["descrip"] = value
-            self.__changed["descrip"] = value
+        if self.__values["descript"] != value:
+            self.__values["descript"] = value
+            self.__changed["descript"] = value
     
     def commit2db(self):
         if self.__changed:
@@ -226,7 +231,7 @@ class Chat():
             self.__counter = 0
             self.updateValues()
             return
-        self._getChats() #refresh cache
+        self.__chats = self._getChats() #refresh cache
         if chatId in self.__chats:
             self.__currentChat = chatId
             self.__counter = 0
