@@ -3,6 +3,7 @@ angular/
 laba/static/files/
 laba/static/chat-frontend
 laba/static/icons
+laba/config
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
