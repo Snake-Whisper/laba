@@ -68,3 +68,5 @@ CREATE TABLE IF NOT EXISTS chatEntries (
     del BOOLEAN DEFAULT FALSE NOT NULL,
 	content TEXT,
 	INDEX (chatID)) ENGINE=INNODB;
+
+INSERT INTO users (id, username, password, firstName, lastName, email) VALUES (1, "bot", "untouchable", "Bot", "Botschinski", "Bot");
