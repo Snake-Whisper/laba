@@ -157,7 +157,13 @@ class Chat():
         self.cursor.execute(sql, (self.__currentChat, self.user.id))
         self.__chats.remove(self.__currentChat)
         self.__currentChat = -1
-
+    
+    def delEntry(self, id):
+        sql="DELETE FROM chatEntries WHERE id=%s AND author=%s"
+        a = self.cursor.execute(sql, (id, self.user.id))
+        if not a:
+            raise NotUrEntry
+        
 
     #@property
     #def chats(self):

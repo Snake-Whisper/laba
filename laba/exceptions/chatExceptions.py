@@ -12,3 +12,7 @@ class ChatNameToLong(Exception):
 class NotAdmin(Exception):
     def __str__(self):
         return "This user isn't an admin for this chat."
+
+class NotUrEntry(Exception):
+    def __str__(self):
+        return "The Selected Entry doesn't belongt to you"

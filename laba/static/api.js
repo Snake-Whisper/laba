@@ -79,6 +79,11 @@ socket.on("error", function(msg) {
     console.error(msg);
 });
 
+socket.on("delPost", function(msg) {
+    console.log(msg);
+    dummy_delPost(msg.chatid, msg.id);
+})
+
 function setChat(id) {
     console.log("Cleared Chat Window...")
     socket.emit("setChat", id);
@@ -126,6 +131,10 @@ function setChatDescription (description) {
 
 function setChatName (name) {
     socket.emit("setChatName", name);
+}
+
+function delPost(id) {
+    socket.emit("delPost", id);
 }
 
 function dummy_mkAdmin(chatid) {
@@ -207,4 +216,8 @@ function dummy_setChatDescription(chatid, ctime, description) {
 
 function dummy_setChatName(chatid, ctime, name) {
     console.log("Change Chat Name for Chat " + chatid + " to " + name);
+}
+
+function dummy_delPost(chatid, id) {
+    console.log("Deleting from chat " + chatid + " entry with id: " + id);
 }

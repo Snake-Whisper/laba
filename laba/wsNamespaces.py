@@ -225,6 +225,9 @@ class ChatNamespace(Namespace):
     def on_setChatDescript(self, msg):
         session["user"].recover()
         session["chat"].recover()
+        if session["chat"].chat == -1:
+            emit("error", "no chat set.")
+            return
         try:
             session["chat"].description = msg
         except NotAdmin:
@@ -247,6 +250,9 @@ class ChatNamespace(Namespace):
     def on_setChatName(self, msg):
         session["user"].recover()
         session["chat"].recover()
+        if session["chat"].chat == -1:
+            emit("error", "no chat set.")
+            return
         try:
             session["chat"].name = msg
         except NotAdmin:
@@ -267,7 +273,22 @@ class ChatNamespace(Namespace):
         emit("addChatEntryBot", package, room=str(session["chat"].chat))
 
     def on_delPost(self, msg):
-        pass
+        session["chat"].recover()
+        session["user"].recover()
+        if session["chat"].chat == -1:
+            emit("error", "no chat set.")
+            return
+        try:
+            session["chat"].delEntry(msg)
+        except NotUrEntry as e:
+            emit("error", str(e))
+            return
+        package = {
+            "ctime" : strftime("%d %b, %H:%M"),
+            "chatid" : session["chat"].chat,
+            "id" : msg
+        }
+        emit("delPost", package, room=str(session["chat"].chat))
     
     #def on_setChatIcon(self, msg):
     #    xhr?
