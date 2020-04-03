@@ -6,7 +6,8 @@ This server implements a simple chat server app written in python/flask.
 Installation:
 -------------
 ```bash
-apt install --no-install-recommends python3-pip python3-venv git
+apt-get update
+apt-get install -y --no-install-recommends python3-pip python3-venv git
 git clone https://github.com/Snake-Whisper/laba
 git checkout build-package
 cd laba
