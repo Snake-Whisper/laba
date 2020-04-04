@@ -1,0 +1,67 @@
+version: '3.3'
+
+services:
+ db:
+  image: mariadb:10.5
+  container_name: laba_db
+  volumes:
+   - db_data:/var/lib/mysql
+  restart: always
+  environment:
+   MYSQL_RANDOM_ROOT_PASSWORD: 1
+   MYSQL_DATABASE: laba
+   MYSQL_USER: laba
+   MYSQL_PASSWORD: laba
+  networks:
+   - laba
+
+ redis:
+  image: redis:alpine
+  container_name: laba_redis
+  restart: always
+  networks:
+   - laba
+
+ redis-commander:
+  container_name: redis-commander
+  hostname: redis-commander
+  image: rediscommander/redis-commander:latest
+  restart: always
+  environment:
+   - REDIS_HOSTS=redis
+  networks:
+   - laba
+  depends_on:
+   - redis
+
+ phpmyadmin:
+  image: phpmyadmin/phpmyadmin:fpm-alpine
+  environment:
+   PMA_HOST: db
+#   PMA_ABSOLUTE_URI: /phpmyadmin
+  volumes:
+   - phpmyadmin_data:/var/www/html/
+  networks:
+   - laba
+  depends_on:
+   - db
+
+ nginx:
+  image: nginx:alpine
+  volumes:
+   - ./docker/nginx-app.conf:/etc/nginx/conf.d/default.conf:ro
+   - phpmyadmin_data:/php_myadmin/:ro
+  ports:
+   - "8080:80"
+  networks:
+   - laba
+  depends_on:
+   - db
+   - phpmyadmin
+
+networks:
+ laba:
+
+volumes:
+ db_data:
+ phpmyadmin_data:
