@@ -9,10 +9,16 @@ from fileFactory import FileFactory
 from json import loads, dumps
 from flask_socketio import SocketIO
 from wsNamespaces import *
+from os import environ
 
 app = Flask(__name__)
 
 app.config.from_pyfile("config")
+
+for i in app.config.keys():
+	if i in environ:
+		app.config[i]=environ[i]
+
 
 socketio = SocketIO(app)
 socketio.on_namespace(ChatNamespace("/chat", app))
