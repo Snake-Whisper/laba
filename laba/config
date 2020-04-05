@@ -5,12 +5,12 @@ TOKEN_TIMEOUT = 60
 MAX_CONTENT_LENGTH = 30 * 1024 * 1024
 DATADIR = "static/files/"
 
-DB_USER = "dbusername"
-DB_DB = "databasename"
-DB_PWD = "databases Password"
-DB_HOST = "databses ip addr"
+DB_USER = "dbUsername"
+DB_DB = "dbName"
+DB_PWD = "dbPasswd"
+DB_HOST = "dbeHostname"
 
-REDIS_HOST = "Redis IP addr"
+REDIS_HOST = "RedisHostname"
 REDIS_DB = 0
 REDIS_PORT = 6379
 

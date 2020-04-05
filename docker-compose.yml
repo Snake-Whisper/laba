@@ -14,6 +14,10 @@ services:
    MYSQL_PASSWORD: laba
   networks:
    - laba
+  healthcheck:
+   test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+   timeout: 20s
+   retries: 10
 
  redis:
   image: redis:alpine
@@ -51,13 +55,35 @@ services:
   volumes:
    - ./docker/nginx-app.conf:/etc/nginx/conf.d/default.conf:ro
    - phpmyadmin_data:/php_myadmin/:ro
+   - app_data:/data:ro
   ports:
    - "8080:80"
   networks:
    - laba
   depends_on:
-   - db
    - phpmyadmin
+   - redis-commander
+   - app
+
+ app:
+  image: laba
+  environment:
+   - DB_USER=laba
+   - DB_DB=laba
+   - DB_PWD=laba
+   - DB_HOST=db
+   - REDIS_HOST=redis
+   - REDIS_DB=0
+   - REDIS_PORT=6379
+  volumes:
+   - ./laba:/laba
+#   - ./entrypoint.sh:/entrypoint.sh
+   - app_data:/data
+  networks:
+   - laba
+  depends_on:
+   - db
+   - redis
 
 networks:
  laba:
@@ -65,3 +91,5 @@ networks:
 volumes:
  db_data:
  phpmyadmin_data:
+ app_data:
+

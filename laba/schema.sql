@@ -1,7 +1,7 @@
 DROP table if exists chatEntries;
-DROP table if exists chats;
 DROP TABLE IF EXISTS chatMembers;
 DROP TABLE IF EXISTS chatAdmins;
+DROP table if exists chats;
 DROP table if exists users;
 DROP table if exists files;
 

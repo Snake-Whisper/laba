@@ -16,4 +16,5 @@ RUN echo "**** install pip ****" && \
 
 RUN pip3 install wheel pymysql redis Flask Flask-SocketIO validate-email eventlet
 COPY entrypoint.sh /
-#ENTRYPOINT ["/entrypoint.sh"]
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
