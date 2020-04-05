@@ -67,7 +67,7 @@ services:
    - app
 
  app:
-  image: laba
+  image: snakewhisper/laba:latest
   environment:
    - DB_USER=laba
    - DB_DB=laba
