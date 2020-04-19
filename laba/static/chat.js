@@ -4,9 +4,11 @@ window.onload = function ()
     chat = {
         currentChat : -1,
         descritps : {},
+        adminForChats : [],
         dom : {
             chatList : document.getElementById("chatList"),
-            chatEntries : document.getElementById("chatEntries")
+            chatEntries : document.getElementById("chatEntries"),
+            inputField : document.getElementById("postField")
         },
         
         craftEntry : function (content, entryid, ctime, author) {
@@ -65,8 +67,13 @@ window.onload = function ()
             return _entry;
         },
 
-        addChatFileEntry : function (content, entryid, ctime, author, name, url) {
-            entry = this.craftFileEntry(content, entryid, ctime, author, name, url);
+        addChatFileEntry : function (chatId, entryid, content, ctime, author, url, filename) {
+            // NOT tested!
+            if (chatId != this.currentChat) {
+                console.log("marking chat" + "chatId");
+                return;
+            }
+            entry = this.craftFileEntry(content, entryid, ctime, author, filename, url);
             this.dom.chatEntries.appendChild(entry);
         },
 
@@ -76,7 +83,11 @@ window.onload = function ()
             this.dom.chatEntries.insertBefore(entry, first);
         },
 
-        addChatEntry : function (content, entryid, ctime, author) {
+        addChatEntry : function (chatId, entryid, content, ctime, author) {
+            if (chatId != this.currentChat) {
+                console.log("marking chat" + "chatId");
+                return;
+            }
             entry = this.craftEntry(content, entryid, ctime, author);
             this.dom.chatEntries.appendChild(entry);
         },
@@ -108,12 +119,44 @@ window.onload = function ()
             this.dom.chatList.appendChild(entry);
         },
 
+        sendPost : function () {            
+            sendPost(this.dom.inputField.value);
+            this.dom.inputField.value = '';            
+        },
+
+        addBotEntry : function (chatId, content, ctime) {
+            if (chatId != this.currentChat) {
+                return; //not important enough for marking
+            }
+            _content = document.createElement("div");
+            _content.appendChild(document.createTextNode(content));
+            _content.class = "content";
+            
+            _author = document.createElement("div");
+            _author.appendChild(document.createTextNode("Bot"));
+            _author.class = "author";
+            
+            _ctime = document.createElement("div");
+            _ctime.appendChild(document.createTextNode(ctime));
+            _ctime.class = "ctime";
+            
+            _entry = document.createElement("div");
+            _entry.appendChild(_content);
+            _entry.appendChild(_author);
+            _entry.appendChild(_ctime);
+            _entry.class = "botentry";
+            
+            this.dom.chatList.appendChild(entry);
+        },
+
         flushChat : function () {
             while (this.dom.chatEntries.firstChild) {
                 this.dom.chatEntries.removeChild(this.dom.chatEntries.firstChild);
             }
+        },
+
+        mkAdmin : function (chatid) {
+            adminForChats.push(chatid);
         }
-
-
     }
 }

@@ -77,6 +77,7 @@ socket.on("setChatName", function (msg) {
 
 socket.on("error", function(msg) {
     console.error(msg);
+    alert(msg);
 });
 
 socket.on("delPost", function(msg) {
@@ -86,8 +87,9 @@ socket.on("delPost", function(msg) {
 
 function setChat(id) {
     chat.flushChat();
-    console.log("Cleared Chat Window...")
+    console.log("Cleared Chat Window...");
     socket.emit("setChat", id);
+    chat.currentChat = id;
 }
 
 function mkChat(chatname) {
@@ -99,7 +101,7 @@ function recieveMore() {
 }
 
 function sendPost(msg) {
-    socket.emit("sendPost", msg)
+    socket.emit("sendPost", msg);
 }
 
 function addMember(username) {
@@ -140,6 +142,7 @@ function delPost(id) {
 
 function dummy_mkAdmin(chatid) {
     console.log("Hey, I'm now a chat Admin for chatid: " + chatid);
+    chat.mkAdmin(chatid);
 }
 
 function dummy_delAdmin(chatid) {
@@ -196,6 +199,7 @@ function dummy_recvPost(chatId, entryid, content, ctime, author) {
     // <old message 0>
     // < NEW message > <--------
     console.log("New Message for Chat " + chatId + ": " + entryid + ") " + content + " (" + author + ", " + ctime + ")");
+    chat.addChatEntry(chatId, entryid, content, ctime, author);
 }
 
 function dummy_recvFile(chatId, entryid, content, ctime, author, url, filename) {
@@ -207,11 +211,13 @@ function dummy_recvFile(chatId, entryid, content, ctime, author, url, filename) 
     // <old message 0>
     // < NEW message > <--------
     console.log("New File for Chat " + chatId + ": " + entryid + ") " + filename + " (" + author + ", " + ctime + ")");
+    chat.addChatFileEntry (chatId, entryid, content, ctime, author, url, filename)
 }
 
 
 function dummy_botEntry(chatId, content, ctime) {
     console.log("Botentry for chat " + chatId + ": " + content);
+    chat.addBotEntry(chatId, content, ctime);
 }
 
 function dummy_setChatDescription(chatid, ctime, description) {
