@@ -147,6 +147,7 @@ function dummy_delAdmin(chatid) {
 
 function dummy_addChat(name, id, icon, descript) {
     console.log("adding chat: " + name + " with id: " + id + " , icon: " + icon + " , description: " + descript);
+    chat.addChat(name, id, icon, descript);
 }
 
 function dummy_delChat(id) {
@@ -168,6 +169,7 @@ function dummy_loadChatEntry(content, entryid, ctime, author) {
     console.log("adding chatEntry: " + entryid + ") " + content
     + " from: " + ctime
     + " by " + author);
+    chat.loadChatEntry(content, entryid, ctime, author);
 }
 
 function dummy_loadChatEntryFile(content, entryid, ctime, author, name, url) {

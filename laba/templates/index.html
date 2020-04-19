@@ -3,12 +3,17 @@
     <head>
         <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
         <script type="text/javascript" charset="utf-8" src="/static/api.js"></script>
+        <script type="text/javascript" charset="utf-8" src="/static/chat.js"></script>
         <title>Main Page | Laba</title>
     </head>
     <body>
-        <form method="post" enctype="multipart/form-data" action="/upload">
+        <!-- <form method="post" enctype="multipart/form-data" action="/upload">
             <input type="file" name="file[]" multiple><br>
             <input type="submit">
-        </form>
+        </form> -->
+        <h1>Chat List</h1>
+        <div id="chatList"></div>
+        <h1>Chat-Entries</h1>
+        <div id="chatEntries"></div>
     </body>
 </html>
