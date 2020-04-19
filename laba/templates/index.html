@@ -4,18 +4,25 @@
         <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
         <script type="text/javascript" charset="utf-8" src="/static/api.js"></script>
         <script type="text/javascript" charset="utf-8" src="/static/chat.js"></script>
+
+        <link rel="icon" href="/data/b/c/3/74f77791e224c5019d4c8fa259d2c51998dba1a61b1c4ca015cdd174d64b0MZ2eyr4gF8" type="image/x-icon" />
+        <link rel="shortcut icon" href="/data/b/c/3/74f77791e224c5019d4c8fa259d2c51998dba1a61b1c4ca015cdd174d64b0MZ2eyr4gF8" type="image/x-icon" />
+        <link rel="apple-touch-icon" sizes="120x120" href="/data/b/c/3/74f77791e224c5019d4c8fa259d2c51998dba1a61b1c4ca015cdd174d64b0MZ2eyr4gF8" />
+        <link rel="apple-touch-icon" sizes="152x152" href="/data/b/c/3/74f77791e224c5019d4c8fa259d2c51998dba1a61b1c4ca015cdd174d64b0MZ2eyr4gF8" />
+
         <title>Main Page | Laba</title>
     </head>
     <body>
-        <form method="post" enctype="multipart/form-data" action="/upload">
-            <input type="file" name="file[]" multiple><br>
-            <input type="submit">
-        </form>
         <h1>Chat List</h1>
         <div id="chatList"></div>
         <h1>Chat-Entries</h1>
         <div id="chatEntries"></div>
         <input type="text" name="post" id="postField">
-		<button id="sendButton" onclick="chat.sendPost()">>></button>
+        <button id="sendButton" onclick="chat.sendPost()">>></button>
+        <h2>File Upload</h2>
+        <form method="post" enctype="multipart/form-data" action="/upload">
+            <input type="file" name="file[]" multiple><br>
+            <input type="submit">
+        </form>
     </body>
 </html>
