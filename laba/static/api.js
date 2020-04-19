@@ -230,4 +230,5 @@ function dummy_setChatName(chatid, ctime, name) {
 
 function dummy_delPost(chatid, id) {
     console.log("Deleting from chat " + chatid + " entry with id: " + id);
+    chat.delEntry(chatid, id);
 }

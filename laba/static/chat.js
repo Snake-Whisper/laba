@@ -157,6 +157,12 @@ window.onload = function ()
 
         mkAdmin : function (chatid) {
             adminForChats.push(chatid);
+        },
+
+        delEntry : function (chatid, id) {
+            if (chatid == this.currentChat) {
+                document.getElementById(id).remove();                
+            }
         }
     }
 }
