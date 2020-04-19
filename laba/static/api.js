@@ -85,6 +85,7 @@ socket.on("delPost", function(msg) {
 })
 
 function setChat(id) {
+    chat.flushChat();
     console.log("Cleared Chat Window...")
     socket.emit("setChat", id);
 }
@@ -179,6 +180,7 @@ function dummy_loadChatEntryFile(content, entryid, ctime, author, name, url) {
                 + " by " + author
                 + " comment: " + content
                 + " url: " + url);
+    chat.loadChatFileEntry(content, entryid, ctime, author, name, url);
 }
 
 function dummy_addMemberOrAdmin(username, admin) {
