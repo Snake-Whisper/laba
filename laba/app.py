@@ -153,6 +153,26 @@ def getDBCursor():
 		g.db = pymysql.connect(user=app.config["DB_USER"], db=app.config["DB_DB"], password=app.config["DB_PWD"], host=app.config["DB_HOST"], cursorclass=pymysql.cursors.DictCursor)
 	return g.db.cursor()
 
+#@app.cli.command('addfile')
+#@click.argument("path")
+#def addPath(path):
+#	filename = os.path.basename(path)
+#	file = open(path, "r")
+#	chks = sha256(file.read()).hexdigest()
+#	salt = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(10)])
+#	url = self.__generate_url(chks, salt)
+#	file.seek(0)
+#	if not os.path.exists(os.path.dirname(url)):
+#		try:
+#			os.makedirs(os.path.dirname(url))
+#		except OSError as exc: # Guard against race condition
+#			if exc.errno != errno.EEXIST:
+#				raise
+#		except PermissionError:
+#			return abort(500)
+#	shutil.copy(path, url)
+#	print("saved: "+filename)
+
 @app.cli.command('initDB')
 def initdb():
 	with app.open_resource('schema.sql', mode='r') as f:

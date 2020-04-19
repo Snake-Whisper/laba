@@ -1,6 +1,6 @@
-FROM alpine:3.11
+FROM alpine:latest
 
-MAINTAINER snake-whisper "snake-whisper@web-utils.eu"
+LABEL maintainer="snake-whisper@web-utils.eu"
 
 ENV PYTHONUNBUFFERED=1
 

@@ -76,7 +76,10 @@ services:
    - REDIS_HOST=redis
    - REDIS_DB=0
    - REDIS_PORT=6379
-   - DATADIR=/data
+   #careful with dir:
+    # - ending with slash
+    # - config nginx to correct location
+   - DATADIR=/data/
   volumes:
    - ./laba:/laba
 #   - ./entrypoint.sh:/entrypoint.sh

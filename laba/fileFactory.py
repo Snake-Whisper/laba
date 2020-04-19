@@ -6,6 +6,7 @@ import os
 import random
 import string
 import pymysql
+import shutil
 import errno
 
 
@@ -58,6 +59,31 @@ class FileFactory():
             print("saved: "+file.filename)
             ids.append(self.queryOne("SELECT id FROM files WHERE chks = %s", chks)['id'])
         return ids
+
+    # def _addFiles(self, path):        
+    #     filename = os.path.basename(path)
+    #     file = open(path, "r")
+    #     chks = sha256(file.read()).hexdigest()
+    #     salt = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(10)])
+    #     try:
+    #         self.query("INSERT INTO files (chks, salt, name) VALUES (%s, %s, %s)", (chks, salt, filename))
+    #     except pymysql.IntegrityError: #it's already there
+    #         #ids.append(self.queryOne("SELECT id FROM files WHERE chks = %s", chks)['id'])
+    #         print("Keep: "+path)
+
+    #     #file sin't here yet -> save
+    #     url = self.__generate_url(chks, salt)
+    #     file.seek(0)
+    #     if not os.path.exists(os.path.dirname(url)):
+    #         try:
+    #             os.makedirs(os.path.dirname(url))
+    #         except OSError as exc: # Guard against race condition
+    #             if exc.errno != errno.EEXIST:
+    #                 raise
+    #         except PermissionError:
+    #             return abort(500)
+    #     shutil.copy(path, url)
+    #     print("saved: "+filename)
     
     def getFile(self, id):
         """returns ['name':filename, 'url':url] for file with id"""

@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS chats (
 	name VARCHAR(50) NOT NULL,
 	owner INT UNSIGNED NOT NULL,
 	ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    icon INT UNSIGNED REFERENCES files(id),
+    icon INT UNSIGNED DEFAULT 1 REFERENCES files(id),
     descript VARCHAR(200),
     FOREIGN KEY (owner) REFERENCES users(id)) ENGINE=INNODB;
 
@@ -70,3 +70,4 @@ CREATE TABLE IF NOT EXISTS chatEntries (
 	INDEX (chatID)) ENGINE=INNODB;
 
 INSERT INTO users (id, username, password, firstName, lastName, email) VALUES (1, "bot", "untouchable", "Bot", "Botschinski", "Bot");
+INSERT INTO files (chks, salt, name) VALUES ("bc374f77791e224c5019d4c8fa259d2c51998dba1a61b1c4ca015cdd174d64b0", "MZ2eyr4gF8", "chat.svg");
