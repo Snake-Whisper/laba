@@ -15,6 +15,9 @@ if [ ! -f /initialized ]; then
 	export FLASK_APP=app.py
 	cd /laba
 	flask initDB
+	echo "COPY"
+	echo $DATADIR
+	cp -r /laba/static/files/* $DATADIR
 	touch /initialized
 fi
 
