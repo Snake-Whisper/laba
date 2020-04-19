@@ -23,5 +23,13 @@ Docker:
 ```bash
 docker-compose up
 ```
+```bash
+#For Testdata:
+docker exec -it laba_app_1 /bin/ash -c 'cd /laba && flask reset'
+```
 
-surf at http://localhost:8080
+surf at http://localhost:8080 
+
+PhpMyAdmin: http://mysql.localhost:8080
+
+RedisCommander: http://redis.localhost:8080
