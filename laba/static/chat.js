@@ -159,6 +159,10 @@ window.onload = function ()
             adminForChats.push(chatid);
         },
 
+        delAdmin : function (chatid) {
+            adminForChats.shift(chatid);
+        },
+
         delEntry : function (chatid, id) {
             if (chatid == this.currentChat) {
                 document.getElementById(id).remove();                

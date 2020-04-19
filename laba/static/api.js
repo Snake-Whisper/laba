@@ -147,6 +147,7 @@ function dummy_mkAdmin(chatid) {
 
 function dummy_delAdmin(chatid) {
     console.log("oh, I'm not any more an Admin of Chat " + chatid);
+    chat.delAdmin(chatid);
 }
 
 function dummy_addChat(name, id, icon, descript) {
