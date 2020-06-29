@@ -56,6 +56,8 @@ class ChatNamespace(Namespace):
         emit("loadChatEntries", session["chat"].loadNextChatEntries())
     
     def on_sendPost(self, msg):
+        if not msg:
+            return
         session["chat"].recover()
         if session["chat"].chat == -1:
             emit("error", "no chat set.")
@@ -73,15 +75,19 @@ class ChatNamespace(Namespace):
     def on_mkChat(self, msg):
         session["chat"].recover()
         id = session["chat"].makeChat(msg)
+        old = session["chat"].chat #fauler hund
+        session["chat"].setChat(id)
+        join_room(str(id))
+        assert id == session["chat"].chat
         packet = {
             "name" : msg,
             "id" : id,
-            "icon" : None,
+            "icon" : session["chat"].icon,
             "descript" : None
         }
-        join_room(str(id))
         print(packet)
         emit("addChat", packet)
+        session["chat"].setChat(old)
     
     def call(self, username, event, msg):
         if not hasattr(g, 'redis'):
@@ -289,7 +295,10 @@ class ChatNamespace(Namespace):
             "id" : msg
         }
         emit("delPost", package, room=str(session["chat"].chat))
-    
+    def on_getSelf(self):
+        session["user"].recover()
+        session["chat"].recover()
+        emit("selfUsername", session["user"].username)
     #def on_setChatIcon(self, msg):
     #    xhr?
     #    pass

@@ -1,0 +1,93 @@
+#chatList {
+    position: absolute;
+    float: left;
+    overflow: auto;
+    width: 15em;
+    height: 85%;
+}
+
+.chatIcon {
+    width: 20%;
+    display: inline-block;
+}
+
+.chatName {
+    position: relative;
+    bottom: 1.2em;
+    left: 0.5em;
+    display: inline-block;
+}
+
+#chatEntries {
+    overflow: auto;
+    position: relative;
+    width: 102%;
+    height: calc(100vh - 15em);
+}
+
+.chatEntry {
+    margin-bottom: 1em;
+}
+
+.right {
+    position: absolute;
+    top: 0;
+    margin-left: 15em;
+    min-width: calc(100vw - 18em);
+}
+
+.entry {
+    display: block;
+    width: calc(100vw - 20em);
+    border: 2px solid #dedede;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+.entry.self {
+    background-color: #ddd;
+    border-color: #ccc;
+}
+
+.entry .author {
+    display: inline-block;
+    font-weight: bold;
+}
+
+.entry .ctime {
+    margin-left: 1em;
+    display: inline-block;
+    font-size: x-small;
+}
+
+.entry .url {
+    margin-top: 1em;
+    display: block;
+}
+
+#postField {
+    margin-top: 0.5em;
+    width: calc(100% - 8em);
+}
+
+input[type=file] {
+    display: inline-block;
+    margin-top: 0.5em;
+}
+
+/**#chatList {
+    overflow: auto;
+    width: 5em;
+    height: 100%;
+    display: inline-block;
+}
+
+.chatIcon {
+    width: 100%;
+    height: 100%;
+}
+
+#chatEntries {
+}**/

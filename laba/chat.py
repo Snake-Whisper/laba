@@ -189,7 +189,7 @@ class Chat():
 #        return NotInChat(self.user.username, chatId)
 
     def updateValues(self):
-        self.__values = self.queryOne("SELECT name, owner, ctime, icon, descript FROM chats WHERE id=%s" , self.__currentChat)
+        self.__values = self.queryOne("SELECT name, owner, ctime, get_file(icon, %s, %s) as icon, descript FROM chats WHERE id=%s" , (self.app.config["DATADIR"], self.app.config["FILEDIR_DEEP"], self.__currentChat))
 
     @property
     def name(self):
@@ -229,7 +229,9 @@ class Chat():
         self.commit2db()
         #print("Chat obj is going down....")
     
-    #TODO: add icon
+    @property
+    def icon(self):
+        return self.__values["icon"]
     
     def setChat(self, chatId):
         if chatId in self.__chats:

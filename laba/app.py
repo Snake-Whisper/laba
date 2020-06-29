@@ -48,7 +48,7 @@ def login():
 					g.user = LoginUser(app, request.form['username'], request.form['password'])
 					return redirect("/")
 				except BadUserCredentials:
-					flash("authentication failure")
+					flash("Authentication failure")
 					return redirect("/login")			
 		return render_template("login.html")
 

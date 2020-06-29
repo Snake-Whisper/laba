@@ -8,7 +8,7 @@ from exceptions.userException import *
 from hashlib import sha256
 
 
-class User():    
+class User():  
 
     __changed = {}
     _values = {}

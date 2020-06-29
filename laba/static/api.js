@@ -9,6 +9,11 @@ socket.on('disconnect', function() {
     dummy_disconnect();
 });
 
+socket.on('selfUsername', function(msg) {
+    console.log(msg);
+    chat.username = msg;
+})
+
 socket.on("loadChatList", function(msg) {
     console.log(msg);
     msg.forEach(chat => {
@@ -26,6 +31,7 @@ socket.on("loadChatEntries", function(msg) {
             dummy_loadChatEntryFile(entry.content, entry.entryid, entry.ctime, entry.username, file.name, file.url);
         }
     });
+    chat.dom.chatEntries.lastChild.scrollIntoView();
 });
 
 socket.on("recvPost", function (msg) {

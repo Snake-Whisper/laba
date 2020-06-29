@@ -21,4 +21,4 @@ SALT_LENGHT = 10
 FILEDIR_DEEP = 3
 
 #number of chatentries loaded per chunk
-CHAT_BLOCK_ROWS = 5
+CHAT_BLOCK_ROWS = 10

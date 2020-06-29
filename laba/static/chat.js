@@ -3,6 +3,7 @@ window.onload = function ()
 {
     chat = {
         currentChat : -1,
+        username : "test",
         descritps : {},
         adminForChats : [],
         dom : {
@@ -12,24 +13,29 @@ window.onload = function ()
         },
         
         craftEntry : function (content, entryid, ctime, author) {
-            
-            _content = document.createElement("div");
+
+            _content = document.createElement("p");
             _content.appendChild(document.createTextNode(content));
-            _content.class = "content";
+            _content.classList.add("content");
             
             _author = document.createElement("div");
             _author.appendChild(document.createTextNode(author));
-            _author.class = "author";
+            _author.classList.add("author");
             
             _ctime = document.createElement("div");
             _ctime.appendChild(document.createTextNode(ctime));
-            _ctime.class = "ctime";
+            _ctime.classList.add("ctime");
             
             _entry = document.createElement("div");
-            _entry.appendChild(_content);
             _entry.appendChild(_author);
             _entry.appendChild(_ctime);
-            _entry.class = "entry";
+            _entry.appendChild(_content);
+            _entry.classList.add("entry");
+
+            if (author == chat.username) {
+                _entry.classList.add("self");
+            }
+            
             _entry.id = entryid;
 
             return _entry;
@@ -41,26 +47,31 @@ window.onload = function ()
             _url.appendChild(document.createTextNode(name));
             _url.href = url;
             _url.download = name;
-            _url.class = "url";
+            _url.classList.add("url");
 
-            _content = document.createElement("div");
+            _content = document.createElement("p");
             _content.appendChild(document.createTextNode(content));
-            _content.class = "content";
+            _content.classList.add("content");
             
             _author = document.createElement("div");
             _author.appendChild(document.createTextNode(author));
-            _author.class = "author";
+            _author.classList.add("author");
             
             _ctime = document.createElement("div");
             _ctime.appendChild(document.createTextNode(ctime));
-            _ctime.class = "ctime";
+            _ctime.classList.add("ctime");
             
             _entry = document.createElement("div");
-            _entry.appendChild(_url);
-            _entry.appendChild(_content);
             _entry.appendChild(_author);
             _entry.appendChild(_ctime);
-            _entry.class = "entry";
+            _entry.appendChild(_url);
+            _entry.appendChild(_content);
+            _entry.classList.add("entry");
+
+            if (author == chat.username) {
+                _entry.classList.add("self");
+            }
+
             _entry.id = entryid;
             //_entry.style.cursor = "pointer";
 
@@ -75,6 +86,7 @@ window.onload = function ()
             }
             entry = this.craftFileEntry(content, entryid, ctime, author, filename, url);
             this.dom.chatEntries.appendChild(entry);
+            this.dom.chatEntries.lastChild.scrollIntoView();
         },
 
         loadChatFileEntry : function (content, entryid, ctime, author, name, url) {
@@ -90,6 +102,7 @@ window.onload = function ()
             }
             entry = this.craftEntry(content, entryid, ctime, author);
             this.dom.chatEntries.appendChild(entry);
+            this.dom.chatEntries.lastChild.scrollIntoView();
         },
 
         loadChatEntry : function (content, entryid, ctime, author) {
@@ -101,16 +114,16 @@ window.onload = function ()
         addChat : function (name, id, icon, descript) {
             img = document.createElement("img");
             img.src = icon;
-            img.class = "chatIcon";
+            img.classList.add("chatIcon");
 
             chatName = document.createElement("div");
             chatName.appendChild(document.createTextNode(name));
-            chatName.class = "chatName";
+            chatName.classList.add("chatName");
 
             this.descritps[id] = descript;
 
             entry = document.createElement("div");
-            entry.class = "chatEntry";
+            entry.classList.add("chatEntry");
             entry.appendChild(img);
             entry.appendChild(chatName);
             entry.onclick = function () {setChat(id);};
@@ -121,7 +134,13 @@ window.onload = function ()
 
         sendPost : function () {            
             sendPost(this.dom.inputField.value);
-            this.dom.inputField.value = '';            
+            this.dom.inputField.value = '';
+            
+        },
+
+        addNewChat : function () {
+            mkChat(this.dom.inputField.value);
+            this.dom.inputField.value = '';
         },
 
         addBotEntry : function (chatId, content, ctime) {
@@ -130,21 +149,21 @@ window.onload = function ()
             }
             _content = document.createElement("div");
             _content.appendChild(document.createTextNode(content));
-            _content.class = "content";
+            _content.classList.add("content");
             
             _author = document.createElement("div");
             _author.appendChild(document.createTextNode("Bot"));
-            _author.class = "author";
+            _author.classList.add("author");
             
             _ctime = document.createElement("div");
             _ctime.appendChild(document.createTextNode(ctime));
-            _ctime.class = "ctime";
+            _ctime.classList.add("ctime");
             
             _entry = document.createElement("div");
             _entry.appendChild(_content);
             _entry.appendChild(_author);
             _entry.appendChild(_ctime);
-            _entry.class = "botentry";
+            _entry.classList.add("botentry");
             
             this.dom.chatList.appendChild(entry);
         },
@@ -169,4 +188,6 @@ window.onload = function ()
             }
         }
     }
+    socket.emit("getSelf");
 }
+
