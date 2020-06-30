@@ -124,6 +124,7 @@ input[type=file] {
 }**/
 
 #chatName {
+    display: inline-block;
     cursor: pointer;
     width: calc(100% - 8em);
     line-height: 2.5em;
@@ -188,6 +189,16 @@ input[type=file] {
 
 #addChat {
     cursor: pointer;
+}
+
+#logout {
+    font-size: large;
+    color: blue;
+    font-weight: bold;
+    text-decoration: none;
+    display: inline-block;
+    position: relative;
+    left: 3em;
 }
 
 /**#chatList {
