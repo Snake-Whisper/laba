@@ -18,20 +18,31 @@
     </head>
     <body>
         <div class="left">
-         <h1>Chat List</h1>         
+         <h1>Chat List</h1>
+         <h3 id="addChat" onclick="chat.addNewChat()">+ Add new Chat</h3>   
          <div id="chatList"></div>
         </div>
         <div class="right">
-         <h1>Chat-Entries</h1>
+         <h3 id="chatName">Select Chat</h3>
+         <div id="chatMembers">
+            <div id="addMember" onclick="chat.addMember()">+ Add Chat member</div>
+         </div>
          <div id="chatEntries"></div>
          <input type="text" name="post" id="postField">
          <button id="sendButton" onclick="chat.sendPost()">>></button>
-         <button onclick="chat.addNewChat()" >+</button>
+         <!--
+         <div class="admin">
+             <button onclick="chat.addNewChat()" >+ Chat</button>
+             <button onclick="chat.addMember()" >+ Memb</button>
+             <button onclick="chat.delMember()" >- Memb</button>
+             <button onclick="chat.mkAdmin()" >+ Admin</button>
+             <button onclick="chat.delAdmin()" >- Admin</button>
+         </div>-->
          <!--<h2>File Upload</h2>
          <form method="post" enctype="multipart/form-data" action="/upload">
              <input type="file" name="file[]" multiple>
-             <input type="submit" value="Upload file"> -->
-         </form>
+             <input type="submit" value="Upload file">
+         </form> -->
         </div>
     </body>
 </html>

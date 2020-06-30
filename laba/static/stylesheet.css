@@ -3,10 +3,12 @@
     float: left;
     overflow: auto;
     width: 15em;
-    height: 85%;
+    height: 80%;
 }
 
 .chatIcon {
+    position: relative;
+    left: 1em;
     width: 20%;
     display: inline-block;
 }
@@ -14,8 +16,16 @@
 .chatName {
     position: relative;
     bottom: 1.2em;
-    left: 0.5em;
+    left: 1.5em;
     display: inline-block;
+}
+
+.delIcon {
+    cursor: pointer;
+    color: red;
+    display: inline-block;
+    position: relative;
+    bottom: 1.2em;
 }
 
 #chatEntries {
@@ -27,6 +37,11 @@
 
 .chatEntry {
     margin-bottom: 1em;
+}
+
+.chatEntry.marked {
+    border-radius: 5px;
+    background-color: lime;
 }
 
 .right {
@@ -46,6 +61,10 @@
     margin: 10px 0;
 }
 
+.entry.bot {
+    background-color: #bbbbbb;
+}
+
 .entry.self {
     background-color: #ddd;
     border-color: #ccc;
@@ -56,10 +75,23 @@
     font-weight: bold;
 }
 
+.entry.bot .author {
+    display: none;
+}
+
 .entry .ctime {
     margin-left: 1em;
     display: inline-block;
     font-size: x-small;
+}
+
+.entry.bot .ctime {
+    margin-left: 0;
+}
+
+.entry.bot .content {
+    font-size: small;
+    line-height: 1em;
 }
 
 .entry .url {
@@ -75,6 +107,87 @@
 input[type=file] {
     display: inline-block;
     margin-top: 0.5em;
+}
+
+#sendButton {
+    height: 2.75em;
+}
+
+/**.admin {
+    display: flex;
+    width: calc(100% - 5em);
+}
+
+.admin button {
+    width: 100%;
+    height: 2.75em;
+}**/
+
+#chatName {
+    cursor: pointer;
+    width: calc(100% - 8em);
+    line-height: 2.5em;
+    text-align: center;
+}
+
+#chatMembers {
+    overflow: auto;
+    z-index: 100;
+    background-color: white;
+    position: absolute;
+    border: 1px solid black;
+    border-radius: 10px;
+    margin-left: 8em;
+    width: calc(100% - 8em - 10em);
+    height: calc(100vh - 15em);
+    visibility: hidden;
+}
+
+.chat-member {
+    display: inline-block;
+    max-width: calc(100% - 1em);
+    position: relative;
+    left: 1em;
+}
+
+.chat-admin {
+    color: red;
+}
+
+.mkAdmin {
+    cursor: pointer;
+    color: green;
+    display: inline-block;
+    position: relative;
+    left: 0.5em;
+}
+
+.delAdmin {
+    color: red;
+}
+
+.member-entry {
+    position: relative;
+    left: 2em;
+    line-height: 2em;
+    max-width: calc(100% - 2em);
+}
+
+.member-entry .delIcon {
+    bottom: 0;
+}
+
+#addMember {
+    cursor: pointer;
+    max-width: calc(100% - 1em);
+    position: relative;
+    left: 1em;
+    margin-top: 0.5em;
+    margin-bottom: 1.5em;
+}
+
+#addChat {
+    cursor: pointer;
 }
 
 /**#chatList {

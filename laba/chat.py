@@ -141,6 +141,8 @@ class Chat():
         affenRows = self.cursor.execute(sql, (self.__currentChat, member))
         if not affenRows:
             raise NotInChat(member, self.chat)
+        sql = "DELETE FROM chatAdmins WHERE chatid=%s AND userid= (SELECT id FROM users WHERE username=%s)"
+        self.cursor.execute(sql, (self.__currentChat, member))
     
     def delAdmin(self, member):
         if not self.isAdmin():

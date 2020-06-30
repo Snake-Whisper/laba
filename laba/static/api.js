@@ -25,13 +25,21 @@ socket.on("loadChatEntries", function(msg) {
     console.log(msg);
     msg.chatEntries.forEach(entry => {
         if (entry.file == null) {
+            if (entry.username == "bot") {
+                console.log("Bot spoke");
+                chat.loadBotEntry(entry.content, entry.entryid, entry.ctime, entry.username);
+            } else {
             dummy_loadChatEntry(entry.content, entry.entryid, entry.ctime, entry.username);
+            }
         } else {
             file = msg.files.pop();
             dummy_loadChatEntryFile(entry.content, entry.entryid, entry.ctime, entry.username, file.name, file.url);
         }
     });
-    chat.dom.chatEntries.lastChild.scrollIntoView();
+
+    if(chat.dom.chatEntries.lastChild != null) {
+        chat.dom.chatEntries.lastChild.scrollIntoView();
+    }
 });
 
 socket.on("recvPost", function (msg) {
@@ -57,8 +65,9 @@ socket.on('mkAdmin', function (msg) {
 
 socket.on('listMembers', function (msg) {
     console.log(msg);
+    chat.clearMemberList();
     msg.members.forEach( entry => {
-        dummy_addMemberOrAdmin(entry, msg.admins.includes(entry));
+        addMemberOrAdmin(entry, msg.admins.includes(entry));
     })
 });
 socket.on('delChat', function(msg) {
@@ -91,11 +100,15 @@ socket.on("delPost", function(msg) {
     dummy_delPost(msg.chatid, msg.id);
 })
 
-function setChat(id) {
+function setChat(id, name) {
+    chat.hideMemberList();
     chat.flushChat();
     console.log("Cleared Chat Window...");
     socket.emit("setChat", id);
     chat.currentChat = id;
+    chat.currentName = name
+    chat.dom.chatName.innerHTML = chat.currentName;
+    chat.dom.chatName.onclick = function() { chat.toggleMemberList(id); };
 }
 
 function mkChat(chatname) {
@@ -193,9 +206,10 @@ function dummy_loadChatEntryFile(content, entryid, ctime, author, name, url) {
     chat.loadChatFileEntry(content, entryid, ctime, author, name, url);
 }
 
-function dummy_addMemberOrAdmin(username, admin) {
+function addMemberOrAdmin(username, admin) {
     //TODO: filter self -> admin/dau?
     console.log("Add " + (admin ? "admin: " : "user: ") + username)
+    chat.addMemberOrAdmin(username, admin);
 }
 function dummy_recvPost(chatId, entryid, content, ctime, author) {
     //INSERT before LAST_NODE.

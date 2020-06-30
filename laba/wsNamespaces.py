@@ -73,6 +73,8 @@ class ChatNamespace(Namespace):
         emit("recvPost", packet, room=str(session["chat"].chat))
     
     def on_mkChat(self, msg):
+        if not msg:
+            return
         session["chat"].recover()
         id = session["chat"].makeChat(msg)
         old = session["chat"].chat #fauler hund
@@ -92,9 +94,10 @@ class ChatNamespace(Namespace):
     def call(self, username, event, msg):
         if not hasattr(g, 'redis'):
             g.redis = Redis(host=app.config["REDIS_HOST"], port=app.config["REDIS_PORT"], db=app.config["REDIS_DB"])
-        sid = g.redis.get(username).decode()
+        sid = g.redis.get(username)
         if not sid:
             return
+        sid = sid.decode()
         emit(event, msg, room=sid)
     
     def on_addMember(self, msg):
@@ -106,7 +109,7 @@ class ChatNamespace(Namespace):
             emit("error", "You're not an Admin for this Chat")
             return
         except pymysql.IntegrityError:
-            emit ("error", "User {0} is already member".format(msg))
+            emit ("error", "User {0} is already member or does not exist".format(msg))
             return
         package = {
             "id" : session["chat"].chat,
@@ -114,7 +117,8 @@ class ChatNamespace(Namespace):
         }
         self.call(msg, "addChat", package)
         print(g.redis.get(msg))
-        join_room(str(session["chat"].chat), sid=g.redis.get(msg).decode())
+        if g.redis.get(msg): #dirty
+            join_room(str(session["chat"].chat), sid=g.redis.get(msg).decode())
         package = {"ctime" : strftime("%d %b, %H:%M"), 
 			"content" : "{0} added {1}".format(session["user"].username, msg),
 			"chatId" : session["chat"].chat
@@ -299,6 +303,12 @@ class ChatNamespace(Namespace):
         session["user"].recover()
         session["chat"].recover()
         emit("selfUsername", session["user"].username)
+    
+    #def on_getChatName(self):
+    #    session["user"].recover()
+    #    session["chat"].recover()
+    #    print(session["chat"].current)
+    #    emit
     #def on_setChatIcon(self, msg):
     #    xhr?
     #    pass
